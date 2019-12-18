@@ -4,8 +4,9 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="keywords" content="Hello World, Broncokool">
-    <meta name="description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hex">
+    <meta name="keywords" content="nlp文本聚类, Broncokool">
+    <meta name="description" content="NLP文本聚类组内工程项目要做生成式文本摘要，前期做了一些文本预处理和评测工具调研工作，这周分配了文本聚类的任务，还是从调研开始。
+一、文本聚类定义​    文本聚类主要是依据著名的聚类假设：同类的文档相似度较大，而不同类的文档相似度较小。">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -13,7 +14,7 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Hello World | Broncokool</title>
+    <title>nlp文本聚类 | Broncokool</title>
     <link rel="icon" type="image/png" href="/log.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
@@ -303,12 +304,12 @@
 
 
 
-<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/12.jpg')">
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/16.jpg')">
     <div class="container" style="right: 0px;left: 0px;">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
-                    <h1 class="description center-align post-title">Hello World</h1>
+                    <h1 class="description center-align post-title">nlp文本聚类</h1>
                 </div>
             </div>
         </div>
@@ -423,9 +424,13 @@
             <div class="row tag-cate">
                 <div class="col s7">
                     
-                          <div class="article-tag">
-                            <span class="chip bg-color">无标签</span>
-                          </div>
+                    <div class="article-tag">
+                        
+                            <a href="/tags/%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E5%A4%84%E7%90%86/">
+                                <span class="chip bg-color">自然语言处理</span>
+                            </a>
+                        
+                    </div>
                     
                 </div>
                 <div class="col s5 right-align">
@@ -454,19 +459,192 @@
         <hr class="clearfix">
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html" target="_blank" rel="noopener">Deployment</a></p>
+                <h1 id="NLP文本聚类"><a href="#NLP文本聚类" class="headerlink" title="NLP文本聚类"></a>NLP文本聚类</h1><p>组内工程项目要做生成式文本摘要，前期做了一些文本预处理和评测工具调研工作，这周分配了文本聚类的任务，还是从调研开始。</p>
+<h2 id="一、文本聚类定义"><a href="#一、文本聚类定义" class="headerlink" title="一、文本聚类定义"></a>一、文本聚类定义</h2><p>​    文本聚类主要是依据著名的聚类假设：同类的文档相似度较大，而不同类的文档相似度较小。作为一种无监督的机器学习方法，聚类由于不需要训练过程，以及不需要预先对文档手工标注类别，因此具有一定的灵活性和较高的自动化处理能力，已经成为对文本信息进行有效地组织、摘要和导航的重要手段。</p>
+<h2 id="二、算法分类"><a href="#二、算法分类" class="headerlink" title="二、算法分类"></a>二、算法分类</h2><h3 id="1-划分法-基于划分的聚类方法"><a href="#1-划分法-基于划分的聚类方法" class="headerlink" title="1 划分法(基于划分的聚类方法)"></a>1 划分法(基于划分的聚类方法)</h3><p>​        给定一个有N个元组或者纪录的数据集，分裂法将构造K个分组，每一个分组就代表一个聚类，K&lt;N。而且这K个分组满足下列条件：（1）每一个分组至少包含一个数据纪录；（2）每一个数据纪录属于且仅属于一个分组（注意：这个要求在某些模糊聚类算法中可以放宽）；对于给定的K，算法首先给出一个初始的分组方法，以后通过反复迭代的方法改变分组，使得每一次改进之后的分组方案都较前一次好，而所谓好的标准就是：同一分组中的记录越近越好，而不同分组中的记录越远越好。  </p>
+<p>​        使用这个基本思想的算法有：K-Means算法、K-MEDOIDS算法、CLARANS算法。</p>
+<p>​        K-means算法是一种典型的基于划分的聚类算法，该聚类算法的基本思想是在聚类开始时根据用户预设的类簇数目k随机地在所有文本集当中选择k个对象，将这些对象作为k个初始类簇的平均值或者中心，对于文本集中剩余的每个对象，根据对象到每一个类簇中心的欧几里得距离，划分到最近的类簇中；全部分配完之后，重新计算每个类簇的平均值或者中心，再计算每篇文本距离这些新的类簇平均值或中心的距离，将文本重新归入目前最近的类簇中；不断重复这个过程，直到所有的样本都不能再重新分配为止。</p>
+<p>​        K-means算法优点：</p>
+<blockquote>
+<p>（1）对待处理文本的输入顺序不太敏感</p>
+</blockquote>
+<blockquote>
+<p>（2）对凸型聚类有较好结果</p>
+</blockquote>
+<blockquote>
+<p>（3）可在任意范围内进行聚类。</p>
+</blockquote>
+<p>​        缺点：</p>
+<blockquote>
+<p>（1）对初始聚类中心的选取比较敏感，往往得不到全局最优解，得到的多是次优解</p>
+</blockquote>
+<blockquote>
+<p>（2）关于算法需要预先设定的k值，限定了聚类结果中话题的个数，这在非给定语料的应用中并不可行</p>
+</blockquote>
+<blockquote>
+<p>（3）该算法容易受到异常点的干扰而造成结果的严重偏差</p>
+</blockquote>
+<blockquote>
+<p>（4）算法缺少可伸缩性</p>
+</blockquote>
+<p>  算法的描述如下：</p>
+<p><img src="/images/img2.png" alt=""></p>
+<p>  Kmeans的第二个缺点是致命的，因为在有些时候，我们不知道样本集将要聚成多少个类别，这种时候kmeans是不适合的，推荐使用hierarchical 或meanshift来聚类。第一个缺点可以通过多次聚类取最佳结果来解决。  </p>
+<h3 id="2-层次法"><a href="#2-层次法" class="headerlink" title="2 层次法"></a>2 层次法</h3><p>​        这种方法对给定的数据集进行层次似的分解，直到某种条件满足为止。具体又可分为“自底向上”和“自顶向下”两种方案，即合并聚类（由下而上）和分裂聚类（由上而下）。</p>
+<p>​        合并层次聚类是将语料库中的任一数据都当作一个新的簇，计算所有簇相互之间的相似度，然后将相似度最大的两个簇进行合并，重复这个步骤直到达到某个终止条件，因此合并聚类方法也被称为由下而上的方法。</p>
+<p>​        分裂聚类恰好与合并聚类进行相反的操作，它是一种由上而下的方法，该方法先将数据集中所有的对象都归为同一簇，并将不断地对原来的簇进行划分从而得到更小的簇，直到满足最初设定的某个终止条件。</p>
+<p>​        层次聚类法的优点:</p>
+<blockquote>
+<p>（1）适用于发现任意形状的簇</p>
+</blockquote>
+<blockquote>
+<p>（2）适用于任意形式的相似度或距离表示形式</p>
+</blockquote>
+<blockquote>
+<p>（3）聚类粒度的灵活性</p>
+</blockquote>
+<p>​    缺点：</p>
+<blockquote>
+<p>（1）算法终止的条件很模糊，难以精确表达并控制算法的停止</p>
+</blockquote>
+<blockquote>
+<p>（2）一旦聚类结果形成，一般不再重新构建层次结构来提高聚类的性能</p>
+</blockquote>
+<blockquote>
+<p>（3）难以处理大规模数据，也不能适应动态数据集的处理。</p>
+</blockquote>
+<p>​    由于层次聚类算法简单，因此针对它的研究也比较多，也提出了不少改进算法，主要方向就是将该策略与其他聚类策略相结合从而形成多层聚类。</p>
+<p>​    代表算法有：BIRCH算法、CURE算法、CHAMELEON算法等。</p>
+<h3 id="3-基于密度的方法"><a href="#3-基于密度的方法" class="headerlink" title="3:基于密度的方法"></a>3:基于密度的方法</h3><p>基于密度的方法与其他方法的一个根本区别是：它不是基于各种各样的距离的，而是基于密度的。这样就能克服基于距离的算法智能发现“类圆形”的缺点。这个方法的指导思想就是，只要一个区域中的点的密度大过某个阈值，就把它加到与之相近的聚类中去。</p>
+<p>​    代表算法有：DBSCAN算法、OPTICS算法、DENCLUE算法等。</p>
+<p>​    典型的基于密度的算法是DBSCAN算法，该算法基本思想是：对于一个类中的每一个对象，在其给定半径R的区域中包含的对象数目不小于某一给定的最小数目，即在DBSCAN中，一个类被认为是密度大于一个给定阈值的一组对象的集合，能够被其中的任意一个核心对象所确定。DBSCAN算法执行时，先从数据集w中找到任意一个对象q，并查找w中关于R和最小下限数MinPts的从q密度到达的所有对象。如果q是核心对象，也就是说，q半径为R的领域中包含的对象数不少于MinPts，则根据算法可以找到一个关于参数R和MinPts的类。如果q是一个边界点，即q半径为R的领域包含的对象数小于MinPts，则没有对象从q密度到达，q被暂时标注为噪声点。然后，DBSCAN处理数据集W中的下一个对象。</p>
+<p>DBSCAN中的几个重要概念：</p>
+<ul>
+<li>Ε邻域：给定对象半径为Ε内的区域称为该对象的Ε邻域；</li>
+<li>核心对象：如果给定对象Ε邻域内的样本点数大于等于MinPts，则称该对象为核心对象；</li>
+<li>直接密度可达：对于样本集合D，如果样本点q在p的Ε邻域内，并且p为核心对象，那么对象q从对象p直接密度可达。</li>
+<li>密度可达：对于样本集合D，给定一串样本点p1,p2….pn，p= p1,q= pn,假如对象pi从pi-1直接密度可达，那么对象q从对象p密度可达。</li>
+<li>密度相连：存在样本集合D中的一点o，如果对象o到对象p和对象q都是密度可达的，那么p和q密度相联。</li>
+</ul>
+<p>​        可以发现，密度可达是直接密度可达的传递闭包，并且这种关系是非对称的。密度相连是对称关系。DBSCAN目的是找到密度相连对象的最大集合。<br>Eg: 假设半径Ε=3，MinPts=3，点p的E邻域中有点{m,p,p1,p2,o}, 点m的E邻域中有点{m,q,p,m1,m2},点q的E邻域中有点{q,m},点o的E邻域中有点{o,p,s},点s的E邻域中有点{o,s,s1}.<br>那么核心对象有p,m,o,s(q不是核心对象，因为它对应的E邻域中点数量等于2，小于MinPts=3)；<br>点m从点p直接密度可达，因为m在p的E邻域内，并且p为核心对象；<br>点q从点p密度可达，因为点q从点m直接密度可达，并且点m从点p直接密度可达；<br>点q到点s密度相连，因为点q从点p密度可达，并且s从点p密度可达。</p>
+<p>DBSCAN算法步骤如下：</p>
+<p><img src="/images/img1.png" alt=""></p>
+<p>   <strong>优点</strong>:</p>
+<blockquote>
+<p>与K-means方法相比，DBSCAN不需要事先知道要形成的簇类的数量。</p>
+</blockquote>
+<blockquote>
+<p>与K-means方法相比，DBSCAN可以发现任意形状的簇类。</p>
+</blockquote>
+<blockquote>
+<p>同时，DBSCAN能够识别出噪声点。</p>
+</blockquote>
+<blockquote>
+<p>DBSCAN对于数据库中样本的顺序不敏感，即Pattern的输入顺序对结果的影响不大。但是，对于处于簇类之间边界样本，可能会根据哪个簇类优先被探测到而其归属有所摆动。</p>
+</blockquote>
+<p>​    DBSCAN聚类算法存在如下缺点：</p>
+<blockquote>
+<p>（1）随着对于大数据量的应用，需要有很大的内存支持与I/O开销。</p>
+</blockquote>
+<blockquote>
+<p>（2）由于使用了全局参数R和MinPts，因此没有考虑数据密度和类别距离大小的不均匀性，所以DBSCAN算法很难得到高质量的聚类结果。</p>
+</blockquote>
+<blockquote>
+<p>（3）算法参数过于复杂，领域外人员很难理解和掌握。</p>
+</blockquote>
+<h3 id="4-图论聚类法"><a href="#4-图论聚类法" class="headerlink" title="4  图论聚类法"></a>4  图论聚类法</h3><p>图论聚类方法最早是由Zahn提出的，又称作最大（小）支撑聚类算法。图论聚类要建立与问题相适应的图，图的节点对应于被分析数据的最小单元，图的边或者是弧对应于最小数据之间的相似性度量。因此，每个最小处理单元之间都会有一个度量的表达，这就确保数据局部特性比较易于处理。图论聚类法是以样本数据的局域链接特征作为聚类的主要信息源，因而其优点是易于处理局部数据的特性。</p>
+<h4 id="图论聚类思想"><a href="#图论聚类思想" class="headerlink" title="图论聚类思想"></a><strong>图论聚类思想</strong></h4><p>  图论分析中，把待分类的对象想x1,x2,x3,x4……看做一个全连接无向图G=[X,E]中的节点，然后给每一条边赋值，计算任意两点之间的距离（例如欧氏距离）定义为边的权值。并生成最小支撑树，设置阈值将对象进行聚类分析。  </p>
+<p><strong>算法步骤</strong></p>
+<blockquote>
+<p>利用prim算法构造最小支撑树。</p>
+</blockquote>
+<blockquote>
+<p>给定一个阈值r,在最小支撑树中移除权值大于阈值的边，形成森林。</p>
+</blockquote>
+<blockquote>
+<p>森林中包含剩下的所有的树。</p>
+</blockquote>
+<blockquote>
+<p>每棵树视为一个聚类。</p>
+</blockquote>
+<h4 id="典型算法：AP算法"><a href="#典型算法：AP算法" class="headerlink" title="典型算法：AP算法"></a>典型算法：AP算法</h4><p>  <a href="https://www.cnblogs.com/huadongw/p/4202492.html" target="_blank" rel="noopener">AP聚类算法（Affinity propagation Clustering Algorithm ）</a>    是基于数据点间的”信息传递”的一种聚类算法。与k-均值算法或k中心点算法不同，AP算法不需要在运行算法之前确定聚类的个数。AP算法寻找的”examplars”即聚类中心点是数据集合中实际存在的点，作为每类的代表。  </p>
+<h5 id="算法描述："><a href="#算法描述：" class="headerlink" title="算法描述："></a>算法描述：</h5><p>假设数据样${x_1,x_2,\cdots,x_n} $本集，数据间没有内在结构的假设。令$s$是一个刻画点之间相似度的矩阵，使得$s(i,j)&gt;s(i,k)$当且仅当$x_i$与$x_j$的相似性大于其与$x_k$的相似性。</p>
+<p>AP算法进行交替两个消息传递的步骤，以更新两个矩阵：</p>
+<blockquote>
+<p>吸引信息（responsibility）矩阵$R：r(i,k)$ liuliu描述了数据对象<em>k</em>适合作为数据对象<em>i</em>的聚类中心的程度，表示的是从<em>i</em>到<em>k</em>的消息；</p>
+</blockquote>
+<blockquote>
+<p>归属信息（availability）矩阵$A：a(i,k)$描述了数据对象i选择数据对象<em>k</em>作为其据聚类中心的适合程度，表示从<em>k</em>到<em>i</em>的消息。</p>
+</blockquote>
+<p>  两个矩阵<strong>R</strong> ,<strong>A</strong>中的全部初始化为0<strong>.</strong> 可以看成<em>Log</em>-概率表。这个算法通过以下步骤迭代进行：</p>
+<p>  首先，吸引信息（responsibility)  ${r_{t + 1}}(i,k)$按照<br>$$<br>{r_{t + 1}}(i,k) = s(i,k) - \mathop {\max }\limits_{k’ \ne k} \{ {a_t}(i,k’) + s(i,k’)\}<br>$$<br>迭代。</p>
+<p>  然后，归属信息（availability）  ${a_{t + 1}}(i,k)$ 按照<br>$$<br>{a_{t + 1}}(i,k) = \mathop {\min }\limits_{} \left( {0,{r_t}(k,k) + \sum\limits_{i’ \notin \{ i,k\} } {\max \{ 0,{r_t}(i’,k)\} } } \right),i \ne k<br>$$<br>和<br>$$<br>{a_{t+1}}(k,k) = \sum\limits_{i’ \ne k} {\max \{ 0,{r_t}(i’,k)\} }<br>$$<br>迭代。</p>
+<p>  对以上步骤进行迭代，如果这些决策经过若干次迭代之后保持不变或者算法执行超过设定的迭代次数，又或者一个小区域内的关于样本点的决策经过数次迭代后保持不变，则算法结束。  </p>
+<p>  为了避免振荡，AP算法更新信息时引入了衰减系数<em>λ</em>。每条信息被设置为它前次迭代更新值的<em>λ</em>倍加上本次信息更新值的1-<em>λ</em>倍。其中，衰减系数<em>λ</em>是介于0到1之间的实数。即第t+1次  $r(i,k)$,$a(i,k)$的迭代值<br>$$<br>{r_{t + 1}}(i,k) \leftarrow (1 - \lambda ){r_{t + 1}}(i,k) + \lambda {r_t}(i,k)<br>$$</p>
+<p>$$<br>{a_{t + 1}}(i,k) \leftarrow (1 - \lambda ){a_{t + 1}}(i,k) + \lambda {a_t}(i,k)<br>$$</p>
+<h3 id="5-基于网格的聚类"><a href="#5-基于网格的聚类" class="headerlink" title="5 基于网格的聚类"></a>5 基于网格的聚类</h3><h4 id="基本思想"><a href="#基本思想" class="headerlink" title="基本思想"></a>基本思想</h4><p>  基于网格的聚类算法首先将d维数据空间的每一维平均分割成等长的区间段,即把数据空间分割成一些网格单元。若一个网格单元中所含数据量大于给定的值,则将其定为高密度单元;否则将其视为低密度单元。如果一个低密度网格单元的相邻单元都是低密度的,则视这个低密度单元中的节点为孤立点或噪声节点。网格聚类就是这些相邻的高密度单元相连的较大集合。  </p>
+<blockquote>
+<p>将每个属性的可能值分割成许多相邻的区间,创建网格单元的集合(类似于对各维特征进行等宽或等深分箱).将每个样本映射到网格单元中,同时统计每个网格单元的信息,如样本数,均值,中位数,最大最小值,分布等.之后所有处理的基本单位都是网格单元.</p>
+</blockquote>
+<blockquote>
+<p>删除密度低于某个指定阈值$\gamma$的网格单元.</p>
+</blockquote>
+<blockquote>
+<p>由稠密的单元组形成簇</p>
+</blockquote>
+<h4 id="典型的网格聚类算法"><a href="#典型的网格聚类算法" class="headerlink" title="典型的网格聚类算法"></a>典型的网格聚类算法</h4><p>STING：基于网格多分辨率，将空间划分为方形单元，对应不同分辨率</p>
+<p>CLIQUE：结合网格和密度聚类的思想，子空间聚类处理大规模高维度数据</p>
+<p>WaveCluster：用小波分析使簇的边界变得更加清晰</p>
+<h4 id="核心步骤"><a href="#核心步骤" class="headerlink" title="核心步骤"></a>核心步骤</h4><blockquote>
+<p>1、 划分网格</p>
+</blockquote>
+<blockquote>
+<p>2、 使用网格单元内数据的统计信息对数据进行压缩表达</p>
+</blockquote>
+<blockquote>
+<p>3、 基于这些统计信息判断高密度网格单元</p>
+</blockquote>
+<blockquote>
+<p>4、 最后将相连的高密度网格单元识别为簇</p>
+</blockquote>
+<h3 id="6-基于主题模型的聚类"><a href="#6-基于主题模型的聚类" class="headerlink" title="6 基于主题模型的聚类"></a>6 基于主题模型的聚类</h3><p>基于主题模型的聚类算法是假定数据的分布是符合一系列的概率分布，用概率分布模型去对数据进行聚类，而不是像层次聚类和划分聚类那样基于距离来进行聚类。因此，模型的好坏就直接决定了聚类效果的好坏。目前比较常用的基于主题聚类算法有LDA和PLSA等，其中LDA是PLSA的一个“升级”，它在PLSA的基础上加了Dirichlet先验分布，相比PLSA不容易产生过拟合现象，LDA是目前较为流行的用于聚类的主题模型。</p>
+<h4 id="LDA（Latent-Dirichlet-Allocation，隐含狄利克雷分配）"><a href="#LDA（Latent-Dirichlet-Allocation，隐含狄利克雷分配）" class="headerlink" title="LDA（Latent Dirichlet Allocation，隐含狄利克雷分配）"></a>LDA（Latent Dirichlet Allocation，隐含狄利克雷分配）</h4><p>是一种三层贝叶斯概率模型，它由文档层、主题层和词层构成。LDA对三层结构作了如下的假设：</p>
+<p>整个文档集合中存在k个相互独立的主题</p>
+<blockquote>
+<p>每一个主题是词上的多项分布</p>
+</blockquote>
+<blockquote>
+<p>每一个文档由k个主题随机混合组成</p>
+</blockquote>
+<blockquote>
+<p>每一个文档是k个主题上的多项分布</p>
+</blockquote>
+<blockquote>
+<p>每一个文档的主题概率分布的先验分布是Dirichlet分布</p>
+</blockquote>
+<blockquote>
+<p>每一个主题中词的概率分布的先验分布是Dirichlet分布 </p>
+</blockquote>
+<p> LDA可以被认为是如下的一个聚类过程： </p>
+<blockquote>
+<p>（1）各个主题（Topics）对应于各类的“质心”，每一篇文档被视为数据集中的一个样本。 </p>
+</blockquote>
+<blockquote>
+<p>（2）主题和文档都被认为存在一个向量空间中，这个向量空间中的每个特征向量都是词频（词袋模型） </p>
+</blockquote>
+<blockquote>
+<p>（3）与采用传统聚类方法中采用距离公式来衡量不同的是，LDA使用一个基于统计模型的方程，而这个统计模型揭示出这些文档都是怎么产生的。</p>
+</blockquote>
+<p>  它基于一个常识性假设：文档集合中的所有文本均共享一定数量的隐含主题。基于该假设，它将整个文档集特征化为隐含主题的集合，而每篇文本被表示为这些隐含主题的特定比例的混合。  </p>
+<h5 id="核心思想"><a href="#核心思想" class="headerlink" title="核心思想"></a>核心思想</h5><blockquote>
+<p>（1）隐含主题，形象的说就是一个桶，里面装了出现概率较高的单词，从聚类的角度来说，各个主题（Topics）对应于各类的“质心”，主题和文档都被认为存在于同一个词频向量空间中。</p>
+</blockquote>
+<blockquote>
+<p>（2）在文档集合中的所有文本均共享一定数量的隐含主题的假设下，我们将寻找一个基于统计模型的方程。   </p>
+</blockquote>
+<p>  LDA的核心公式如下：<br>$$<br>p(w|d) = \sum_{i=1}^K{ p(w|z_k)*p(z_k|d) }<br>$$<br>$d$代表某篇文档，$w$代表某个单词，$z_k$代表第$i$主题，共有$K$个主题。通俗的理解是：文档$d$以一定概率属于主题$z_k$，即$p(z_k|d)$，而主题$z_k$下出现单词$w$的先验概率是$p(w|z_k)$，因此在主题$z_k$下，文档出现单词$w$的概率是$p(w|z_k)∗p(z_k|d)$，自然把文档在所有主题下$t_{i:K}$出现单词$w$的概率加起来，就是文档$d$中出现单词$w$的概率$p(w|d)$（词频）。 </p>
+<p>  上面式子的左边，就是文档的词频，是很容易统计得到的。如果一篇文章中有很多个词语，那么就有很多个等式了。再如果我们收集了很多的文档，那么就有更多的等式了。这时候就是一个矩阵了，等式左边的矩阵是已知的，右边其实就是我们要求解的目标-与隐含主题相关，图示如下：   </p>
+<p><img src="/images/img3.png" alt=""></p>
 
             </div>
             <hr/>
@@ -492,7 +670,7 @@
                     </i>
                 </span>
                 <span class="reprint-info">
-                    <a href="http://broncokool.github.io/2019/12/17/hello-world/">http://broncokool.github.io/2019/12/17/hello-world/</a>
+                    <a href="http://broncokool.github.io/2019/12/17/nlp-wen-ben-ju-lei/">http://broncokool.github.io/2019/12/17/nlp-wen-ben-ju-lei/</a>
                 </span>
             </div>
             <div class="reprint__notice">
@@ -529,7 +707,11 @@
                 <div class="post-meta__tag-list" style="display: inline-block;">
                     
                         <div class="article-tag">
-                            <span class="chip bg-color">无标签</span>
+                            
+                                <a href="/tags/%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E5%A4%84%E7%90%86/">
+                                    <span class="chip bg-color">自然语言处理</span>
+                                </a>
+                            
                         </div>
                     
                 </div>
@@ -693,9 +875,57 @@
 <article id="prenext-posts" class="prev-next articles">
     <div class="row article-row">
         
-        <div class="article col s12 m6" data-aos="fade-up">
+        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
             <div class="article-badge left-badge text-color">
-                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+                <i class="far fa-dot-circle"></i>&nbsp;本篇
+            </div>
+            <div class="card">
+                <a href="/2019/12/17/nlp-wen-ben-ju-lei/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/16.jpg" class="responsive-img" alt="nlp文本聚类">
+                        
+                        <span class="card-title">nlp文本聚类</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            NLP文本聚类组内工程项目要做生成式文本摘要，前期做了一些文本预处理和评测工具调研工作，这周分配了文本聚类的任务，还是从调研开始。
+一、文本聚类定义​    文本聚类主要是依据著名的聚类假设：同类的文档相似度较大，而不同类的文档相似度较小。
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2019-12-17
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-user fa-fw"></i>
+                            Yingshuai Kou
+                            
+                        </span>
+                    </div>
+                </div>
+
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E5%A4%84%E7%90%86/">
+                        <span class="chip bg-color">自然语言处理</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
             <div class="card">
                 <a href="/2019/12/17/first-blog/">
                     <div class="card-image">
@@ -714,9 +944,9 @@
                         
                     </div>
                     <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="far fa-clock fa-fw icon-date"></i>2019-12-17
-                        </span>
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2019-12-17
+                            </span>
                         <span class="publish-author">
                             
                             <i class="fas fa-user fa-fw"></i>
@@ -733,44 +963,6 @@
                     </a>
                     
                 </div>
-                
-            </div>
-        </div>
-        
-        
-        <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge right-badge text-color">
-                本篇&nbsp;<i class="far fa-dot-circle"></i>
-            </div>
-            <div class="card">
-                <a href="/2019/12/17/hello-world/">
-                    <div class="card-image">
-                        
-                        
-                        <img src="/medias/featureimages/12.jpg" class="responsive-img" alt="Hello World">
-                        
-                        <span class="card-title">Hello World</span>
-                    </div>
-                </a>
-                <div class="card-content article-content">
-                    <div class="summary block-with-text">
-                        
-                            Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hex
-                        
-                    </div>
-                    <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2019-12-17
-                            </span>
-                        <span class="publish-author">
-                            
-                            <i class="fas fa-user fa-fw"></i>
-                            Yingshuai Kou
-                            
-                        </span>
-                    </div>
-                </div>
-
                 
             </div>
         </div>
