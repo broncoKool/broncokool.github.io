@@ -1,0 +1,1484 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="nlp聚类-EM和SOM算法, Broncokool">
+    <meta name="description" content="前言依旧是项目相关，前期调研了文本聚类的方法，现在开始着手实现基于模型的聚类方法，主要包括基于高斯混合模型的EM算法和基于神经网络的SOM算法，下面分别从原理和实现两方面介绍这两种算法。
+一 高斯混合模型EM算法1.1 高斯混合聚类k-me">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>nlp聚类-EM和SOM算法 | Broncokool</title>
+    <link rel="icon" type="image/png" href="/log.png">
+
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+    
+    <script src="/libs/jquery/jquery.min.js"></script>
+    
+<meta name="generator" content="Hexo 4.1.1"><link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper head-container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/log.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">Broncokool</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/contact" class="waves-effect waves-light">
+      
+      <i class="fas fa-comments" style="zoom: 0.6;"></i>
+      
+      <span>留言板</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/friends" class="waves-effect waves-light">
+      
+      <i class="fas fa-address-book" style="zoom: 0.6;"></i>
+      
+      <span>友情链接</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/log.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">Broncokool</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
+        </div>
+    </div>
+
+    
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/contact" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-comments"></i>
+			
+			Contact
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/friends" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-address-book"></i>
+			
+			友情链接
+		</a>
+          
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/broncoKool" class="waves-effect waves-light" target="_blank">
+                <i class="fab fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #F062A7;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/broncoKool" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/11.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">nlp聚类-EM和SOM算法</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        margin: 35px 0 15px 0;
+        padding-left: 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        height: calc(100vh - 250px);
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #toc-content .is-active-link::before {
+        background-color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E5%A4%84%E7%90%86/">
+                                <span class="chip bg-color">自然语言处理</span>
+                            </a>
+                        
+                            <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">
+                                <span class="chip bg-color">机器学习</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E5%A4%84%E7%90%86/" class="post-category">
+                                自然语言处理
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2019-12-25
+                </div>
+                
+
+                
+
+                
+
+                
+				
+                
+            </div>
+            
+        </div>
+        <hr class="clearfix">
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>依旧是项目相关，前期调研了文本聚类的方法，现在开始着手实现基于模型的聚类方法，主要包括基于高斯混合模型的EM算法和基于神经网络的SOM算法，下面分别从原理和实现两方面介绍这两种算法。</p>
+<h2 id="一-高斯混合模型EM算法"><a href="#一-高斯混合模型EM算法" class="headerlink" title="一 高斯混合模型EM算法"></a>一 高斯混合模型EM算法</h2><h3 id="1-1-高斯混合聚类"><a href="#1-1-高斯混合聚类" class="headerlink" title="1.1 高斯混合聚类"></a>1.1 高斯混合聚类</h3><p>k-means用原型向量来刻画聚类，高斯混合聚类采用的是<strong>概率模型</strong>来表达聚类原型。</p>
+<p>不一样的参数下，高斯分布如下：</p>
+<p>对于多元高斯分布，$n$维样本空间$X$当中的随机向量$x$，概率密度函数为：<br>$$<br>p(x|\mu,\Sigma ) = \frac{1}{(2\pi)^{\frac{n}{2}}|\Sigma |^{\frac{1}{2}}}e^{-\frac{1}{2}(x-\mu)^T\Sigma ^{-1}(x-\mu)}<br>$$<br>  其中<em>μ</em>是<em>n</em>维均值向量，Σ是<em>n</em>×<em>m</em>的协方差矩阵。高斯概率密度函数由<em>μ</em>和Σ两个参数决定.  </p>
+<p>高斯混合分布为：<br>$$<br>f(x) = \sum_{i=1}^k\alpha_ip(x|\mu,\Sigma )<br>$$<br>  该分布由<em>k</em>个高斯分布混合而成，$\alpha_i$为混合系数，$\alpha_i≥0$且$∑^k_{i=1}α_i=1$.(权重和为1)  </p>
+<p>为了求解各个权重系数，常用EM算法</p>
+<h3 id="1-2-EM算法"><a href="#1-2-EM算法" class="headerlink" title="1.2 EM算法"></a>1.2 EM算法</h3><h4 id="1-2-1-抛硬币问题"><a href="#1-2-1-抛硬币问题" class="headerlink" title="1.2.1 抛硬币问题"></a>1.2.1 抛硬币问题</h4><p>如果有A和B两个不均匀的硬币，选择任意一个硬币抛10次（这里我们知道选择的是哪一个硬币），共计选择5次。正面记为H，反面记为T，求A和B再抛正面向上的概率？</p>
+<p>使用极大似然估计来计算：</p>
+<ul>
+<li>统计出每次实验，正反面的次数</li>
+<li>多次实验结果相加</li>
+<li>相除得到结果，<em>P</em>(<em>A</em>)=0.8,<em>P</em>(<em>B</em>)=0.45</li>
+</ul>
+<p><strong>但是在实际过程中，很有可能我们只知道有两个硬币，不知道每次选择的哪一个硬币，问是否能求出每个硬币抛出正面的概率</strong>？</p>
+<p>这里使用的时EM算法。</p>
+<ul>
+<li>假设$\hatθ^{(0)}_A=0.6,\hatθ^{(0)}_B=0.5$</li>
+<li>统计每次的实验结果，记录正反面</li>
+<li>通过贝叶斯公式，估计每次实验选择的A硬币或是B硬币的概率</li>
+<li>依据计算出的选择硬币概率得到该概率下的正反面结果</li>
+<li>相加，相除得到$\hatθ^{(1)}_A≈0.71,\hatθ^{(1)}_B≈0.58$</li>
+<li>重复上面的过程，例如迭代10次后，得到$\hatθ^{(10)}_A≈0.8,\hatθ^{(10)}_B≈0.52$</li>
+<li>$\hatθ^{(10)}_A,\hatθ^{(10)}_B$就是使用EM算法计算出的概率值</li>
+</ul>
+<p>如何用贝叶斯公式计算实验选择是A硬币和B硬币的概率？那么先看下面这个例子：</p>
+<p>假如现在有射击运动员甲和乙，甲乙射击靶心的概率为  $\hatθ_甲=0.9，\hatθ_乙=0.2  $，如果现在有一组实验结果为</p>
+<p>中，不中，中，中，中，</p>
+<p>问这次是谁射击的？<br><strong>直观上的来看，非常大的概率是甲射击的，但是也有可能是乙走狗屎运了。那么该如何从概率的角度计算是谁射击的？</strong><br>首先我们知道选择甲和乙的概率为<em>P</em>(甲)=<em>P</em>(乙)=0.5（先验概率）,本次实验记为E。通过贝叶斯公式<br>$$<br>\begin{align<em>}<br>P(甲|E)&amp;= \frac{P(E|甲)P(甲)}{P(E)} \<br>&amp;= \frac{P(E|甲)P(甲)}{P(E|甲)P(甲)+P(E|乙)P(乙)} \<br>&amp;= \frac{(0.9^{4}×0.1)×0.5}{(0.9^{4}×0.1)×0.5+(0.2^{4}×0.8)×0.5} \<br>&amp;≈ 98\%  \<br>\end{align</em>}<br>$$<br> 故本次实验有98%的可能是A射击的，2%的可能是B射击的。  </p>
+<p>有了上面的案例，我们再次回到抛硬币的问题上，由贝叶斯公式<br>$$<br>P(A|E) = \frac{P(E|A)P(A)}{P(E)}<br>$$<br>  <em>A</em>为选用硬币A，<em>E</em>为本次实验。而选择两个硬币的概率是相同的：<em>P</em>(<em>A</em>)=<em>P</em>(<em>B</em>)=12<br> 且<em>P</em>(<em>E</em>|<em>A</em>)=0.65×0.45≈0.0008,<em>P</em>(<em>E</em>|<em>B</em>)=$0.5^5×0.5^5$≈0.001<br>$$<br>\begin{align<em>}<br>P(A|E)&amp;= \frac{P(E|A)P(A)}{P(E)}  \<br>&amp;= \frac{P(E|A)P(A)}{P(E|A)P(A)+P(E|B)P(B)} \<br>&amp;= \frac{(0.6^{5}×0.4^{5})×\frac{1}{2}}{(0.6^{5}×0.4^{5})×\frac{1}{2}+(0.5^{5}×0.5^{5})×\frac{1}{2}}\<br>&amp;≈0.45  \<br>\end{align</em>}<br>$$<br>有$0.45×10×\frac{1}{2}≈2.2$故第一次实验结果平均下来，有2.2个A硬币正面的可能。同理可得到多次实验的平均结果。  </p>
+<p>最后相加相除得到新的<em>A</em>,<em>B</em>抛正面估计值$\hat{\theta}_A^{(1)}≈0.71,\hat{\theta}_B^{(1)}≈0.58$这是我们第一次迭代的值，迭代多测得到最终的估测值。</p>
+<p>  上面我们计算出每次实验中是抛<em>A</em>或抛<em>B</em>的概率值就是隐变量.这个过程就是EM算法的简单案例。 </p>
+<h3 id="1-3-EM算法实现"><a href="#1-3-EM算法实现" class="headerlink" title="1.3 EM算法实现"></a>1.3 EM算法实现</h3><pre class=" language-python"><code class="language-python"><span class="token comment" spellcheck="true"># coding:utf8</span>
+<span class="token comment" spellcheck="true"># 高斯混合模型  使用EM算法解算</span>
+<span class="token comment" spellcheck="true"># 数据集：《机器学习》--西瓜数据4.0   :文件watermelon4.txt</span>
+<span class="token keyword">import</span> numpy <span class="token keyword">as</span> np
+<span class="token keyword">import</span> matplotlib<span class="token punctuation">.</span>pyplot <span class="token keyword">as</span> plt
+<span class="token keyword">import</span> pandas <span class="token keyword">as</span> pd
+
+<span class="token comment" spellcheck="true"># 预处理数据</span>
+<span class="token keyword">def</span> <span class="token function">loadData</span><span class="token punctuation">(</span>filename<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    dataSet <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+    fr <span class="token operator">=</span> open<span class="token punctuation">(</span>filename<span class="token punctuation">)</span>
+    <span class="token keyword">for</span> line <span class="token keyword">in</span> fr<span class="token punctuation">.</span>readlines<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+        curLine <span class="token operator">=</span> line<span class="token punctuation">.</span>strip<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>split<span class="token punctuation">(</span><span class="token string">' '</span><span class="token punctuation">)</span>
+        fltLine <span class="token operator">=</span> list<span class="token punctuation">(</span>map<span class="token punctuation">(</span>float<span class="token punctuation">,</span> curLine<span class="token punctuation">)</span><span class="token punctuation">)</span>
+        dataSet<span class="token punctuation">.</span>append<span class="token punctuation">(</span>fltLine<span class="token punctuation">)</span>
+    <span class="token keyword">print</span><span class="token punctuation">(</span>dataSet<span class="token punctuation">)</span>
+    <span class="token keyword">return</span> dataSet
+
+<span class="token comment" spellcheck="true"># 高斯分布的概率密度函数</span>
+<span class="token keyword">def</span> <span class="token function">prob</span><span class="token punctuation">(</span>x<span class="token punctuation">,</span> mu<span class="token punctuation">,</span> sigma<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    n <span class="token operator">=</span> np<span class="token punctuation">.</span>shape<span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span>
+    expOn <span class="token operator">=</span> float<span class="token punctuation">(</span><span class="token operator">-</span><span class="token number">0.5</span> <span class="token operator">*</span> <span class="token punctuation">(</span>x <span class="token operator">-</span> mu<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token punctuation">(</span>sigma<span class="token punctuation">.</span>I<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>x <span class="token operator">-</span> mu<span class="token punctuation">)</span><span class="token punctuation">.</span>T<span class="token punctuation">)</span><span class="token punctuation">)</span>
+    divBy <span class="token operator">=</span> pow<span class="token punctuation">(</span><span class="token number">2</span> <span class="token operator">*</span> np<span class="token punctuation">.</span>pi<span class="token punctuation">,</span> n <span class="token operator">/</span> <span class="token number">2</span><span class="token punctuation">)</span> <span class="token operator">*</span> pow<span class="token punctuation">(</span>np<span class="token punctuation">.</span>linalg<span class="token punctuation">.</span>det<span class="token punctuation">(</span>sigma<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token number">0.5</span><span class="token punctuation">)</span>  <span class="token comment" spellcheck="true"># np.linalg.det 计算矩阵的行列式</span>
+    <span class="token keyword">return</span> pow<span class="token punctuation">(</span>np<span class="token punctuation">.</span>e<span class="token punctuation">,</span> expOn<span class="token punctuation">)</span> <span class="token operator">/</span> divBy
+
+<span class="token comment" spellcheck="true"># EM算法</span>
+<span class="token keyword">def</span> <span class="token function">EM</span><span class="token punctuation">(</span>dataMat<span class="token punctuation">,</span> maxIter<span class="token operator">=</span><span class="token number">50</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    m<span class="token punctuation">,</span> n <span class="token operator">=</span> np<span class="token punctuation">.</span>shape<span class="token punctuation">(</span>dataMat<span class="token punctuation">)</span>
+    <span class="token comment" spellcheck="true"># 1.初始化各高斯混合成分参数</span>
+    alpha <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">1</span> <span class="token operator">/</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">1</span> <span class="token operator">/</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">1</span> <span class="token operator">/</span> <span class="token number">3</span><span class="token punctuation">]</span>   <span class="token comment" spellcheck="true"># 1.1初始化 alpha1=alpha2=alpha3=1/3</span>
+    mu <span class="token operator">=</span> <span class="token punctuation">[</span>dataMat<span class="token punctuation">[</span><span class="token number">5</span><span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">]</span><span class="token punctuation">,</span> dataMat<span class="token punctuation">[</span><span class="token number">21</span><span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">]</span><span class="token punctuation">,</span> dataMat<span class="token punctuation">[</span><span class="token number">26</span><span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">]</span><span class="token punctuation">]</span> <span class="token comment" spellcheck="true"># 1.2初始化 mu1=x6,mu2=x22,mu3=x27</span>
+    sigma <span class="token operator">=</span> <span class="token punctuation">[</span>np<span class="token punctuation">.</span>mat<span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">[</span><span class="token number">0.1</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0.1</span><span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token keyword">for</span> x <span class="token keyword">in</span> range<span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">]</span>    <span class="token comment" spellcheck="true"># 1.3初始化协方差矩阵</span>
+    gamma <span class="token operator">=</span> np<span class="token punctuation">.</span>mat<span class="token punctuation">(</span>np<span class="token punctuation">.</span>zeros<span class="token punctuation">(</span><span class="token punctuation">(</span>m<span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token keyword">for</span> i <span class="token keyword">in</span> range<span class="token punctuation">(</span>maxIter<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token keyword">for</span> j <span class="token keyword">in</span> range<span class="token punctuation">(</span>m<span class="token punctuation">)</span><span class="token punctuation">:</span>
+            sumAlphaMulP <span class="token operator">=</span> <span class="token number">0</span>
+            <span class="token keyword">for</span> k <span class="token keyword">in</span> range<span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+                gamma<span class="token punctuation">[</span>j<span class="token punctuation">,</span> k<span class="token punctuation">]</span> <span class="token operator">=</span> alpha<span class="token punctuation">[</span>k<span class="token punctuation">]</span> <span class="token operator">*</span> prob<span class="token punctuation">(</span>dataMat<span class="token punctuation">[</span>j<span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">]</span><span class="token punctuation">,</span> mu<span class="token punctuation">[</span>k<span class="token punctuation">]</span><span class="token punctuation">,</span> sigma<span class="token punctuation">[</span>k<span class="token punctuation">]</span><span class="token punctuation">)</span>  <span class="token comment" spellcheck="true"># 4.计算混合成分生成的后验概率，即gamma</span>
+                sumAlphaMulP <span class="token operator">+=</span> gamma<span class="token punctuation">[</span>j<span class="token punctuation">,</span> k<span class="token punctuation">]</span>
+            <span class="token keyword">for</span> k <span class="token keyword">in</span> range<span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+                gamma<span class="token punctuation">[</span>j<span class="token punctuation">,</span> k<span class="token punctuation">]</span> <span class="token operator">/=</span> sumAlphaMulP
+        sumGamma <span class="token operator">=</span> np<span class="token punctuation">.</span>sum<span class="token punctuation">(</span>gamma<span class="token punctuation">,</span> axis<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">)</span>
+
+        <span class="token keyword">for</span> k <span class="token keyword">in</span> range<span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+            mu<span class="token punctuation">[</span>k<span class="token punctuation">]</span> <span class="token operator">=</span> np<span class="token punctuation">.</span>mat<span class="token punctuation">(</span>np<span class="token punctuation">.</span>zeros<span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> n<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+            sigma<span class="token punctuation">[</span>k<span class="token punctuation">]</span> <span class="token operator">=</span> np<span class="token punctuation">.</span>mat<span class="token punctuation">(</span>np<span class="token punctuation">.</span>zeros<span class="token punctuation">(</span><span class="token punctuation">(</span>n<span class="token punctuation">,</span> n<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+            <span class="token keyword">for</span> j <span class="token keyword">in</span> range<span class="token punctuation">(</span>m<span class="token punctuation">)</span><span class="token punctuation">:</span>
+                mu<span class="token punctuation">[</span>k<span class="token punctuation">]</span> <span class="token operator">+=</span> gamma<span class="token punctuation">[</span>j<span class="token punctuation">,</span> k<span class="token punctuation">]</span> <span class="token operator">*</span> dataMat<span class="token punctuation">[</span>j<span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">]</span>
+            mu<span class="token punctuation">[</span>k<span class="token punctuation">]</span> <span class="token operator">/=</span> sumGamma<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">,</span> k<span class="token punctuation">]</span>  <span class="token comment" spellcheck="true"># 7.计算新均值向量</span>
+            <span class="token keyword">for</span> j <span class="token keyword">in</span> range<span class="token punctuation">(</span>m<span class="token punctuation">)</span><span class="token punctuation">:</span>
+                sigma<span class="token punctuation">[</span>k<span class="token punctuation">]</span> <span class="token operator">+=</span> gamma<span class="token punctuation">[</span>j<span class="token punctuation">,</span> k<span class="token punctuation">]</span> <span class="token operator">*</span> <span class="token punctuation">(</span>dataMat<span class="token punctuation">[</span>j<span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">]</span> <span class="token operator">-</span> mu<span class="token punctuation">[</span>k<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">.</span>T <span class="token operator">*</span><span class="token punctuation">(</span>dataMat<span class="token punctuation">[</span>j<span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">]</span> <span class="token operator">-</span> mu<span class="token punctuation">[</span>k<span class="token punctuation">]</span><span class="token punctuation">)</span>
+            sigma<span class="token punctuation">[</span>k<span class="token punctuation">]</span> <span class="token operator">/=</span> sumGamma<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">,</span> k<span class="token punctuation">]</span>  <span class="token comment" spellcheck="true"># 8. 计算新的协方差矩阵</span>
+            alpha<span class="token punctuation">[</span>k<span class="token punctuation">]</span> <span class="token operator">=</span> sumGamma<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">,</span> k<span class="token punctuation">]</span> <span class="token operator">/</span> m   <span class="token comment" spellcheck="true"># 9. 计算新混合系数</span>
+            <span class="token comment" spellcheck="true"># print(mu)</span>
+    <span class="token keyword">return</span> gamma
+
+
+<span class="token comment" spellcheck="true"># init centroids with random samples</span>
+<span class="token keyword">def</span> <span class="token function">initCentroids</span><span class="token punctuation">(</span>dataMat<span class="token punctuation">,</span> k<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    numSamples<span class="token punctuation">,</span> dim <span class="token operator">=</span> dataMat<span class="token punctuation">.</span>shape
+    centroids <span class="token operator">=</span> np<span class="token punctuation">.</span>zeros<span class="token punctuation">(</span><span class="token punctuation">(</span>k<span class="token punctuation">,</span> dim<span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token keyword">for</span> i <span class="token keyword">in</span> range<span class="token punctuation">(</span>k<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        index <span class="token operator">=</span> int<span class="token punctuation">(</span>np<span class="token punctuation">.</span>random<span class="token punctuation">.</span>uniform<span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> numSamples<span class="token punctuation">)</span><span class="token punctuation">)</span>
+        centroids<span class="token punctuation">[</span>i<span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">]</span> <span class="token operator">=</span> dataMat<span class="token punctuation">[</span>index<span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">]</span>
+    <span class="token keyword">return</span> centroids
+
+
+<span class="token keyword">def</span> <span class="token function">gaussianCluster</span><span class="token punctuation">(</span>dataMat<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    m<span class="token punctuation">,</span> n <span class="token operator">=</span> np<span class="token punctuation">.</span>shape<span class="token punctuation">(</span>dataMat<span class="token punctuation">)</span>
+    centroids <span class="token operator">=</span> initCentroids<span class="token punctuation">(</span>dataMat<span class="token punctuation">,</span> m<span class="token punctuation">)</span>  <span class="token comment" spellcheck="true"># step 1: init centroids</span>
+    clusterAssign <span class="token operator">=</span> np<span class="token punctuation">.</span>mat<span class="token punctuation">(</span>np<span class="token punctuation">.</span>zeros<span class="token punctuation">(</span><span class="token punctuation">(</span>m<span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    gamma <span class="token operator">=</span> EM<span class="token punctuation">(</span>dataMat<span class="token punctuation">)</span>
+    <span class="token keyword">for</span> i <span class="token keyword">in</span> range<span class="token punctuation">(</span>m<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token comment" spellcheck="true"># amx返回矩阵最大值，argmax返回矩阵最大值所在下标</span>
+        clusterAssign<span class="token punctuation">[</span>i<span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">]</span> <span class="token operator">=</span> np<span class="token punctuation">.</span>argmax<span class="token punctuation">(</span>gamma<span class="token punctuation">[</span>i<span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span> np<span class="token punctuation">.</span>amax<span class="token punctuation">(</span>gamma<span class="token punctuation">[</span>i<span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">]</span><span class="token punctuation">)</span>  <span class="token comment" spellcheck="true"># 15.确定x的簇标记lambda</span>
+        <span class="token comment" spellcheck="true">## step 4: update centroids</span>
+    <span class="token keyword">for</span> j <span class="token keyword">in</span> range<span class="token punctuation">(</span>m<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        pointsInCluster <span class="token operator">=</span> dataMat<span class="token punctuation">[</span>np<span class="token punctuation">.</span>nonzero<span class="token punctuation">(</span>clusterAssign<span class="token punctuation">[</span><span class="token punctuation">:</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span>A <span class="token operator">==</span> j<span class="token punctuation">)</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">]</span>
+        centroids<span class="token punctuation">[</span>j<span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">]</span> <span class="token operator">=</span> np<span class="token punctuation">.</span>mean<span class="token punctuation">(</span>pointsInCluster<span class="token punctuation">,</span> axis<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">)</span>  <span class="token comment" spellcheck="true"># 计算出均值向量</span>
+    <span class="token keyword">return</span> centroids<span class="token punctuation">,</span> clusterAssign
+
+
+<span class="token keyword">def</span> <span class="token function">showCluster</span><span class="token punctuation">(</span>dataMat<span class="token punctuation">,</span> k<span class="token punctuation">,</span> centroids<span class="token punctuation">,</span> clusterAssment<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    numSamples<span class="token punctuation">,</span> dim <span class="token operator">=</span> dataMat<span class="token punctuation">.</span>shape
+    <span class="token keyword">if</span> dim <span class="token operator">!=</span> <span class="token number">2</span><span class="token punctuation">:</span>
+        <span class="token keyword">print</span><span class="token punctuation">(</span><span class="token string">"Sorry! I can not draw because the dimension of your data is not 2!"</span><span class="token punctuation">)</span>
+        <span class="token keyword">return</span> <span class="token number">1</span>
+
+    mark <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string">'or'</span><span class="token punctuation">,</span> <span class="token string">'ob'</span><span class="token punctuation">,</span> <span class="token string">'og'</span><span class="token punctuation">,</span> <span class="token string">'ok'</span><span class="token punctuation">,</span> <span class="token string">'^r'</span><span class="token punctuation">,</span> <span class="token string">'+r'</span><span class="token punctuation">,</span> <span class="token string">'sr'</span><span class="token punctuation">,</span> <span class="token string">'dr'</span><span class="token punctuation">,</span> <span class="token string">'&lt;r'</span><span class="token punctuation">,</span> <span class="token string">'pr'</span><span class="token punctuation">]</span>
+    <span class="token keyword">if</span> k <span class="token operator">></span> len<span class="token punctuation">(</span>mark<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token keyword">print</span><span class="token punctuation">(</span><span class="token string">"Sorry! Your k is too large!"</span><span class="token punctuation">)</span>
+        <span class="token keyword">return</span> <span class="token number">1</span>
+
+        <span class="token comment" spellcheck="true"># draw all samples</span>
+    <span class="token keyword">for</span> i <span class="token keyword">in</span> range<span class="token punctuation">(</span>numSamples<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        markIndex <span class="token operator">=</span> int<span class="token punctuation">(</span>clusterAssment<span class="token punctuation">[</span>i<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+        plt<span class="token punctuation">.</span>plot<span class="token punctuation">(</span>dataMat<span class="token punctuation">[</span>i<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">,</span> dataMat<span class="token punctuation">[</span>i<span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">,</span> mark<span class="token punctuation">[</span>markIndex<span class="token punctuation">]</span><span class="token punctuation">)</span>
+
+    mark <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string">'Dr'</span><span class="token punctuation">,</span> <span class="token string">'Db'</span><span class="token punctuation">,</span> <span class="token string">'Dg'</span><span class="token punctuation">,</span> <span class="token string">'Dk'</span><span class="token punctuation">,</span> <span class="token string">'^b'</span><span class="token punctuation">,</span> <span class="token string">'+b'</span><span class="token punctuation">,</span> <span class="token string">'sb'</span><span class="token punctuation">,</span> <span class="token string">'db'</span><span class="token punctuation">,</span> <span class="token string">'&lt;b'</span><span class="token punctuation">,</span> <span class="token string">'pb'</span><span class="token punctuation">]</span>
+    <span class="token comment" spellcheck="true"># draw the centroids</span>
+    <span class="token keyword">for</span> i <span class="token keyword">in</span> range<span class="token punctuation">(</span>k<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        plt<span class="token punctuation">.</span>plot<span class="token punctuation">(</span>centroids<span class="token punctuation">[</span>i<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">,</span> centroids<span class="token punctuation">[</span>i<span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">,</span> mark<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">,</span> markersize<span class="token operator">=</span><span class="token number">12</span><span class="token punctuation">)</span>
+
+    plt<span class="token punctuation">.</span>show<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">if</span> __name__<span class="token operator">==</span><span class="token string">"__main__"</span><span class="token punctuation">:</span>
+    <span class="token comment" spellcheck="true"># dataMat = np.mat(loadData('watermelon4.txt'))</span>
+    dataMat <span class="token operator">=</span> np<span class="token punctuation">.</span>mat<span class="token punctuation">(</span>pd<span class="token punctuation">.</span>read_pickle<span class="token punctuation">(</span><span class="token string">'PCA_embedding.pkl'</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    centroids<span class="token punctuation">,</span> clusterAssign <span class="token operator">=</span> gaussianCluster<span class="token punctuation">(</span>dataMat<span class="token punctuation">)</span>
+    <span class="token keyword">print</span><span class="token punctuation">(</span>clusterAssign<span class="token punctuation">.</span>shape<span class="token punctuation">)</span>
+    <span class="token keyword">print</span><span class="token punctuation">(</span>centroids<span class="token punctuation">)</span>
+    showCluster<span class="token punctuation">(</span>dataMat<span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> centroids<span class="token punctuation">,</span> clusterAssign<span class="token punctuation">)</span></code></pre>
+<p>输入的特征维度为2</p>
+<h3 id="1-4-使用scikit-learn包实现EM算法"><a href="#1-4-使用scikit-learn包实现EM算法" class="headerlink" title="1.4 使用scikit-learn包实现EM算法"></a>1.4 使用scikit-learn包实现EM算法</h3><p>  scikit提供了GaussianMixture类。构造方法为:  </p>
+<pre class=" language-python"><code class="language-python"><span class="token keyword">def</span> <span class="token function">__init__</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> n_components<span class="token operator">=</span><span class="token number">1</span><span class="token punctuation">,</span> covariance_type<span class="token operator">=</span><span class="token string">'full'</span><span class="token punctuation">,</span> tol<span class="token operator">=</span><span class="token number">1e</span><span class="token operator">-</span><span class="token number">3</span><span class="token punctuation">,</span>
+                 reg_covar<span class="token operator">=</span><span class="token number">1e</span><span class="token operator">-</span><span class="token number">6</span><span class="token punctuation">,</span> max_iter<span class="token operator">=</span><span class="token number">100</span><span class="token punctuation">,</span> n_init<span class="token operator">=</span><span class="token number">1</span><span class="token punctuation">,</span> init_params<span class="token operator">=</span><span class="token string">'kmeans'</span><span class="token punctuation">,</span>
+                 weights_init<span class="token operator">=</span>None<span class="token punctuation">,</span> means_init<span class="token operator">=</span>None<span class="token punctuation">,</span> precisions_init<span class="token operator">=</span>None<span class="token punctuation">,</span>
+                 random_state<span class="token operator">=</span>None<span class="token punctuation">,</span> warm_start<span class="token operator">=</span><span class="token boolean">False</span><span class="token punctuation">,</span>
+                 verbose<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">,</span> verbose_interval<span class="token operator">=</span><span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">:</span></code></pre>
+<p>参数：</p>
+<p><img src="img1.png" alt=""></p>
+<p>属性介绍：</p>
+<p><img src="img2.png" alt=""></p>
+<p>方法介绍</p>
+<p><img src="img3.png" alt=""></p>
+<p>代码</p>
+<pre class=" language-python"><code class="language-python"><span class="token keyword">from</span> sklearn <span class="token keyword">import</span> mixture
+<span class="token keyword">import</span> matplotlib<span class="token punctuation">.</span>pyplot <span class="token keyword">as</span> plt
+<span class="token keyword">import</span> numpy <span class="token keyword">as</span> np
+<span class="token keyword">import</span> pandas <span class="token keyword">as</span> pd
+
+
+<span class="token comment" spellcheck="true"># 预处理数据</span>
+<span class="token keyword">def</span> <span class="token function">loadData</span><span class="token punctuation">(</span>filename<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    dataSet <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+    fr <span class="token operator">=</span> open<span class="token punctuation">(</span>filename<span class="token punctuation">)</span>
+    <span class="token keyword">for</span> line <span class="token keyword">in</span> fr<span class="token punctuation">.</span>readlines<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+        curLine <span class="token operator">=</span> line<span class="token punctuation">.</span>strip<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>split<span class="token punctuation">(</span><span class="token string">' '</span><span class="token punctuation">)</span>
+        fltLine <span class="token operator">=</span> list<span class="token punctuation">(</span>map<span class="token punctuation">(</span>float<span class="token punctuation">,</span> curLine<span class="token punctuation">)</span><span class="token punctuation">)</span>
+        dataSet<span class="token punctuation">.</span>append<span class="token punctuation">(</span>fltLine<span class="token punctuation">)</span>
+    <span class="token keyword">return</span> dataSet
+
+
+<span class="token keyword">def</span> <span class="token function">test_GMM</span><span class="token punctuation">(</span>dataMat<span class="token punctuation">,</span> components<span class="token operator">=</span><span class="token number">3</span><span class="token punctuation">,</span>iter <span class="token operator">=</span> <span class="token number">100</span><span class="token punctuation">,</span>cov_type<span class="token operator">=</span><span class="token string">"full"</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    clst <span class="token operator">=</span> mixture<span class="token punctuation">.</span>GaussianMixture<span class="token punctuation">(</span>n_components<span class="token operator">=</span>n_components<span class="token punctuation">,</span>max_iter<span class="token operator">=</span>iter<span class="token punctuation">,</span>covariance_type<span class="token operator">=</span>cov_type<span class="token punctuation">)</span>
+    clst<span class="token punctuation">.</span>fit<span class="token punctuation">(</span>dataMat<span class="token punctuation">)</span>
+    predicted_labels <span class="token operator">=</span>clst<span class="token punctuation">.</span>predict<span class="token punctuation">(</span>dataMat<span class="token punctuation">)</span>
+    <span class="token keyword">return</span> clst<span class="token punctuation">.</span>means_<span class="token punctuation">,</span>predicted_labels     <span class="token comment" spellcheck="true"># clst.means_返回均值</span>
+
+
+
+<span class="token keyword">def</span> <span class="token function">showCluster</span><span class="token punctuation">(</span>dataMat<span class="token punctuation">,</span> k<span class="token punctuation">,</span> centroids<span class="token punctuation">,</span> clusterAssment<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    numSamples<span class="token punctuation">,</span> dim <span class="token operator">=</span> dataMat<span class="token punctuation">.</span>shape
+    <span class="token keyword">if</span> dim <span class="token operator">!=</span> <span class="token number">2</span><span class="token punctuation">:</span>
+        <span class="token keyword">print</span><span class="token punctuation">(</span><span class="token string">"Sorry! I can not draw because the dimension of your data is not 2!"</span><span class="token punctuation">)</span>
+        <span class="token keyword">return</span> <span class="token number">1</span>
+
+    mark <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string">'or'</span><span class="token punctuation">,</span> <span class="token string">'ob'</span><span class="token punctuation">,</span> <span class="token string">'og'</span><span class="token punctuation">,</span> <span class="token string">'ok'</span><span class="token punctuation">,</span> <span class="token string">'^r'</span><span class="token punctuation">,</span> <span class="token string">'+r'</span><span class="token punctuation">,</span> <span class="token string">'sr'</span><span class="token punctuation">,</span> <span class="token string">'dr'</span><span class="token punctuation">,</span> <span class="token string">'&lt;r'</span><span class="token punctuation">,</span> <span class="token string">'pr'</span><span class="token punctuation">]</span>
+    <span class="token keyword">if</span> k <span class="token operator">></span> len<span class="token punctuation">(</span>mark<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token keyword">print</span><span class="token punctuation">(</span><span class="token string">"Sorry! Your k is too large!"</span><span class="token punctuation">)</span>
+        <span class="token keyword">return</span> <span class="token number">1</span>
+
+        <span class="token comment" spellcheck="true"># draw all samples</span>
+    <span class="token keyword">for</span> i <span class="token keyword">in</span> range<span class="token punctuation">(</span>numSamples<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        markIndex <span class="token operator">=</span> int<span class="token punctuation">(</span>clusterAssment<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span>
+        plt<span class="token punctuation">.</span>plot<span class="token punctuation">(</span>dataMat<span class="token punctuation">[</span>i<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">,</span> dataMat<span class="token punctuation">[</span>i<span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">,</span> mark<span class="token punctuation">[</span>markIndex<span class="token punctuation">]</span><span class="token punctuation">)</span>
+
+    mark <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string">'Dr'</span><span class="token punctuation">,</span> <span class="token string">'Db'</span><span class="token punctuation">,</span> <span class="token string">'Dg'</span><span class="token punctuation">,</span> <span class="token string">'Dk'</span><span class="token punctuation">,</span> <span class="token string">'^b'</span><span class="token punctuation">,</span> <span class="token string">'+b'</span><span class="token punctuation">,</span> <span class="token string">'sb'</span><span class="token punctuation">,</span> <span class="token string">'db'</span><span class="token punctuation">,</span> <span class="token string">'&lt;b'</span><span class="token punctuation">,</span> <span class="token string">'pb'</span><span class="token punctuation">]</span>
+    <span class="token comment" spellcheck="true"># draw the centroids</span>
+    <span class="token keyword">for</span> i <span class="token keyword">in</span> range<span class="token punctuation">(</span>k<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        plt<span class="token punctuation">.</span>plot<span class="token punctuation">(</span>centroids<span class="token punctuation">[</span>i<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">,</span> centroids<span class="token punctuation">[</span>i<span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">,</span> mark<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">,</span> markersize<span class="token operator">=</span><span class="token number">12</span><span class="token punctuation">)</span>
+
+    plt<span class="token punctuation">.</span>show<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+
+<span class="token keyword">if</span> __name__<span class="token operator">==</span><span class="token string">"__main__"</span><span class="token punctuation">:</span>
+    dataMat <span class="token operator">=</span> np<span class="token punctuation">.</span>mat<span class="token punctuation">(</span>pd<span class="token punctuation">.</span>read_pickle<span class="token punctuation">(</span><span class="token string">'PCA_embedding.pkl'</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    n_components <span class="token operator">=</span> <span class="token number">3</span>
+    iter <span class="token operator">=</span> <span class="token number">100</span>
+    cov_types <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string">'spherical'</span><span class="token punctuation">,</span> <span class="token string">'tied'</span><span class="token punctuation">,</span> <span class="token string">'diag'</span><span class="token punctuation">,</span> <span class="token string">'full'</span><span class="token punctuation">]</span>
+    centroids<span class="token punctuation">,</span>labels <span class="token operator">=</span> test_GMM<span class="token punctuation">(</span>dataMat<span class="token punctuation">,</span>n_components<span class="token punctuation">,</span>iter<span class="token punctuation">,</span>cov_types<span class="token punctuation">[</span><span class="token number">3</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+    showCluster<span class="token punctuation">(</span>dataMat<span class="token punctuation">,</span> n_components<span class="token punctuation">,</span> centroids<span class="token punctuation">,</span> labels<span class="token punctuation">)</span>  <span class="token comment" spellcheck="true"># 这里labels维度改变了，注意修改showCluster方法</span></code></pre>
+<h3 id="1-5-聚类结果"><a href="#1-5-聚类结果" class="headerlink" title="1.5 聚类结果"></a>1.5 聚类结果</h3><p><img src="img5.png" alt=""></p>
+<h2 id="二-基于神经网络的SOM聚类"><a href="#二-基于神经网络的SOM聚类" class="headerlink" title="二 基于神经网络的SOM聚类"></a>二 基于神经网络的SOM聚类</h2><h3 id="2-1-自组织映射网络"><a href="#2-1-自组织映射网络" class="headerlink" title="2.1 自组织映射网络"></a>2.1 自组织映射网络</h3><p>•网络常分为输入层和竞争层（输出层）：</p>
+<p>•输入层：假设一个输入样本为X=[x1,x2,x3,…,xn]，是一个n维向量，则输入层神经元个数为n个。</p>
+<p>•竞争层：通常输出层的神经元以矩阵方式排列在二维空间中，每个神经元都有一个权值向量，权值向量维度与输入层样本维度相同。假设输出层有m个神经元，则有m个权值向量。</p>
+<h3 id="2-2-算法步骤"><a href="#2-2-算法步骤" class="headerlink" title="2.2 算法步骤"></a>2.2 算法步骤</h3><ol>
+<li><strong>初始化</strong>：初始化竞争层m的数目与m个元素的权值向量</li>
+<li><strong>输入比较</strong>：样本输入网络，通过比较样本与m个权值向量的相似性，记相似性最大的竞争层节点为获胜者</li>
+<li><strong>调整权值</strong>：更新获胜者节点的权值</li>
+<li><strong>循环迭代</strong>：重复2，3</li>
+</ol>
+<h3 id="2-3-代码实现"><a href="#2-3-代码实现" class="headerlink" title="2.3 代码实现"></a>2.3 代码实现</h3><pre class=" language-python"><code class="language-python"><span class="token keyword">import</span> numpy <span class="token keyword">as</span> np
+<span class="token keyword">import</span> pylab <span class="token keyword">as</span> pl
+<span class="token keyword">import</span> pandas <span class="token keyword">as</span> pd
+
+<span class="token keyword">class</span> <span class="token class-name">SOM</span><span class="token punctuation">(</span>object<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">def</span> <span class="token function">__init__</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> X<span class="token punctuation">,</span> output<span class="token punctuation">,</span> iteration<span class="token punctuation">,</span> batch_size<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token triple-quoted-string string">"""
+        :param X:  形状是N*D， 输入样本有N个,每个D维
+        :param output: (n,m)一个元组，为输出层的形状是一个n*m的二维矩阵
+        :param iteration:迭代次数
+        :param batch_size:每次迭代时的样本数量
+        初始化一个权值矩阵，形状为D*(n*m)，即有n*m权值向量，每个D维
+        """</span>
+        self<span class="token punctuation">.</span>X <span class="token operator">=</span> X
+        self<span class="token punctuation">.</span>output <span class="token operator">=</span> output
+        self<span class="token punctuation">.</span>iteration <span class="token operator">=</span> iteration
+        self<span class="token punctuation">.</span>batch_size <span class="token operator">=</span> batch_size
+        self<span class="token punctuation">.</span>W <span class="token operator">=</span> np<span class="token punctuation">.</span>random<span class="token punctuation">.</span>rand<span class="token punctuation">(</span>X<span class="token punctuation">.</span>shape<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">,</span> output<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">*</span> output<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+        <span class="token keyword">print</span> <span class="token punctuation">(</span>self<span class="token punctuation">.</span>W<span class="token punctuation">.</span>shape<span class="token punctuation">)</span>
+
+    <span class="token keyword">def</span> <span class="token function">GetN</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> t<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token triple-quoted-string string">"""
+        :param t:时间t, 这里用迭代次数来表示时间
+        :return: 返回一个整数，表示拓扑距离，时间越大，拓扑邻域越小
+        """</span>
+        a <span class="token operator">=</span> min<span class="token punctuation">(</span>self<span class="token punctuation">.</span>output<span class="token punctuation">)</span>
+        <span class="token keyword">return</span> int<span class="token punctuation">(</span>a<span class="token operator">-</span>float<span class="token punctuation">(</span>a<span class="token punctuation">)</span><span class="token operator">*</span>t<span class="token operator">/</span>self<span class="token punctuation">.</span>iteration<span class="token punctuation">)</span>
+
+    <span class="token keyword">def</span> <span class="token function">Geteta</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> t<span class="token punctuation">,</span> n<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token triple-quoted-string string">"""
+        :param t: 时间t, 这里用迭代次数来表示时间
+        :param n: 拓扑距离
+        :return: 返回学习率，
+        """</span>
+        <span class="token keyword">return</span> np<span class="token punctuation">.</span>power<span class="token punctuation">(</span>np<span class="token punctuation">.</span>e<span class="token punctuation">,</span> <span class="token operator">-</span>n<span class="token punctuation">)</span><span class="token operator">/</span><span class="token punctuation">(</span>t<span class="token operator">+</span><span class="token number">2</span><span class="token punctuation">)</span>
+
+    <span class="token keyword">def</span> <span class="token function">updata_W</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> X<span class="token punctuation">,</span> t<span class="token punctuation">,</span> winner<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        N <span class="token operator">=</span> self<span class="token punctuation">.</span>GetN<span class="token punctuation">(</span>t<span class="token punctuation">)</span>
+        <span class="token keyword">for</span> x<span class="token punctuation">,</span> i <span class="token keyword">in</span> enumerate<span class="token punctuation">(</span>winner<span class="token punctuation">)</span><span class="token punctuation">:</span>
+            to_update <span class="token operator">=</span> self<span class="token punctuation">.</span>getneighbor<span class="token punctuation">(</span>i<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">,</span> N<span class="token punctuation">)</span>
+            <span class="token keyword">for</span> j <span class="token keyword">in</span> range<span class="token punctuation">(</span>N<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+                e <span class="token operator">=</span> self<span class="token punctuation">.</span>Geteta<span class="token punctuation">(</span>t<span class="token punctuation">,</span> j<span class="token punctuation">)</span>
+                <span class="token keyword">for</span> w <span class="token keyword">in</span> to_update<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">:</span>
+                    self<span class="token punctuation">.</span>W<span class="token punctuation">[</span><span class="token punctuation">:</span><span class="token punctuation">,</span> w<span class="token punctuation">]</span> <span class="token operator">=</span> np<span class="token punctuation">.</span>add<span class="token punctuation">(</span>self<span class="token punctuation">.</span>W<span class="token punctuation">[</span><span class="token punctuation">:</span><span class="token punctuation">,</span>w<span class="token punctuation">]</span><span class="token punctuation">,</span> e<span class="token operator">*</span><span class="token punctuation">(</span>X<span class="token punctuation">[</span>x<span class="token punctuation">,</span><span class="token punctuation">:</span><span class="token punctuation">]</span> <span class="token operator">-</span> self<span class="token punctuation">.</span>W<span class="token punctuation">[</span><span class="token punctuation">:</span><span class="token punctuation">,</span>w<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+    <span class="token keyword">def</span> <span class="token function">getneighbor</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> index<span class="token punctuation">,</span> N<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token triple-quoted-string string">"""
+        :param index:获胜神经元的下标
+        :param N: 邻域半径
+        :return ans: 返回一个集合列表，分别是不同邻域半径内需要更新的神经元坐标
+        """</span>
+        a<span class="token punctuation">,</span> b <span class="token operator">=</span> self<span class="token punctuation">.</span>output
+        length <span class="token operator">=</span> a<span class="token operator">*</span>b
+        <span class="token keyword">def</span> <span class="token function">distence</span><span class="token punctuation">(</span>index1<span class="token punctuation">,</span> index2<span class="token punctuation">)</span><span class="token punctuation">:</span>
+            i1_a<span class="token punctuation">,</span> i1_b <span class="token operator">=</span> index1 <span class="token operator">//</span> a<span class="token punctuation">,</span> index1 <span class="token operator">%</span> b
+            i2_a<span class="token punctuation">,</span> i2_b <span class="token operator">=</span> index2 <span class="token operator">//</span> a<span class="token punctuation">,</span> index2 <span class="token operator">%</span> b
+            <span class="token keyword">return</span> np<span class="token punctuation">.</span>abs<span class="token punctuation">(</span>i1_a <span class="token operator">-</span> i2_a<span class="token punctuation">)</span><span class="token punctuation">,</span> np<span class="token punctuation">.</span>abs<span class="token punctuation">(</span>i1_b <span class="token operator">-</span> i2_b<span class="token punctuation">)</span>
+
+        ans <span class="token operator">=</span> <span class="token punctuation">[</span>set<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">for</span> i <span class="token keyword">in</span> range<span class="token punctuation">(</span>N<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">]</span>
+        <span class="token keyword">for</span> i <span class="token keyword">in</span> range<span class="token punctuation">(</span>length<span class="token punctuation">)</span><span class="token punctuation">:</span>
+            dist_a<span class="token punctuation">,</span> dist_b <span class="token operator">=</span> distence<span class="token punctuation">(</span>i<span class="token punctuation">,</span> index<span class="token punctuation">)</span>
+            <span class="token keyword">if</span> dist_a <span class="token operator">&lt;=</span> N <span class="token operator">and</span> dist_b <span class="token operator">&lt;=</span> N<span class="token punctuation">:</span> ans<span class="token punctuation">[</span>max<span class="token punctuation">(</span>dist_a<span class="token punctuation">,</span> dist_b<span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">.</span>add<span class="token punctuation">(</span>i<span class="token punctuation">)</span>
+        <span class="token keyword">return</span> ans
+
+
+
+
+    <span class="token keyword">def</span> <span class="token function">train</span><span class="token punctuation">(</span>self<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token triple-quoted-string string">"""
+        train_Y:训练样本与形状为batch_size*(n*m)
+        winner:一个一维向量，batch_size个获胜神经元的下标
+        :return:返回值是调整后的W
+        """</span>
+        count <span class="token operator">=</span> <span class="token number">0</span>
+        <span class="token keyword">while</span> self<span class="token punctuation">.</span>iteration <span class="token operator">></span> count<span class="token punctuation">:</span>
+            train_X <span class="token operator">=</span> self<span class="token punctuation">.</span>X<span class="token punctuation">[</span>np<span class="token punctuation">.</span>random<span class="token punctuation">.</span>choice<span class="token punctuation">(</span>self<span class="token punctuation">.</span>X<span class="token punctuation">.</span>shape<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">,</span> self<span class="token punctuation">.</span>batch_size<span class="token punctuation">)</span><span class="token punctuation">]</span>
+            normal_W<span class="token punctuation">(</span>self<span class="token punctuation">.</span>W<span class="token punctuation">)</span>
+            normal_X<span class="token punctuation">(</span>train_X<span class="token punctuation">)</span>
+            train_Y <span class="token operator">=</span> train_X<span class="token punctuation">.</span>dot<span class="token punctuation">(</span>self<span class="token punctuation">.</span>W<span class="token punctuation">)</span>
+            winner <span class="token operator">=</span> np<span class="token punctuation">.</span>argmax<span class="token punctuation">(</span>train_Y<span class="token punctuation">,</span> axis<span class="token operator">=</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">.</span>tolist<span class="token punctuation">(</span><span class="token punctuation">)</span>
+            self<span class="token punctuation">.</span>updata_W<span class="token punctuation">(</span>train_X<span class="token punctuation">,</span> count<span class="token punctuation">,</span> winner<span class="token punctuation">)</span>
+            count <span class="token operator">+=</span> <span class="token number">1</span>
+        <span class="token keyword">return</span> self<span class="token punctuation">.</span>W
+
+    <span class="token keyword">def</span> <span class="token function">train_result</span><span class="token punctuation">(</span>self<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        normal_X<span class="token punctuation">(</span>self<span class="token punctuation">.</span>X<span class="token punctuation">)</span>
+        train_Y <span class="token operator">=</span> self<span class="token punctuation">.</span>X<span class="token punctuation">.</span>dot<span class="token punctuation">(</span>self<span class="token punctuation">.</span>W<span class="token punctuation">)</span>
+        winner <span class="token operator">=</span> np<span class="token punctuation">.</span>argmax<span class="token punctuation">(</span>train_Y<span class="token punctuation">,</span> axis<span class="token operator">=</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">.</span>tolist<span class="token punctuation">(</span><span class="token punctuation">)</span>
+        <span class="token keyword">print</span> <span class="token punctuation">(</span>winner<span class="token punctuation">)</span>
+        <span class="token keyword">return</span> winner
+
+<span class="token keyword">def</span> <span class="token function">normal_X</span><span class="token punctuation">(</span>X<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token triple-quoted-string string">"""
+    :param X:二维矩阵，N*D，N个D维的数据
+    :return: 将X归一化的结果
+    """</span>
+    N<span class="token punctuation">,</span> D <span class="token operator">=</span> X<span class="token punctuation">.</span>shape
+    <span class="token keyword">for</span> i <span class="token keyword">in</span> range<span class="token punctuation">(</span>N<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        temp <span class="token operator">=</span> np<span class="token punctuation">.</span>sum<span class="token punctuation">(</span>np<span class="token punctuation">.</span>multiply<span class="token punctuation">(</span>X<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">,</span> X<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+        X<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">/=</span> np<span class="token punctuation">.</span>sqrt<span class="token punctuation">(</span>temp<span class="token punctuation">)</span>
+    <span class="token keyword">return</span> X
+<span class="token keyword">def</span> <span class="token function">normal_W</span><span class="token punctuation">(</span>W<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token triple-quoted-string string">"""
+    :param W:二维矩阵，D*(n*m)，D个n*m维的数据
+    :return: 将W归一化的结果
+    """</span>
+    <span class="token keyword">for</span> i <span class="token keyword">in</span> range<span class="token punctuation">(</span>W<span class="token punctuation">.</span>shape<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+        temp <span class="token operator">=</span> np<span class="token punctuation">.</span>sum<span class="token punctuation">(</span>np<span class="token punctuation">.</span>multiply<span class="token punctuation">(</span>W<span class="token punctuation">[</span><span class="token punctuation">:</span><span class="token punctuation">,</span>i<span class="token punctuation">]</span><span class="token punctuation">,</span> W<span class="token punctuation">[</span><span class="token punctuation">:</span><span class="token punctuation">,</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+        W<span class="token punctuation">[</span><span class="token punctuation">:</span><span class="token punctuation">,</span> i<span class="token punctuation">]</span> <span class="token operator">/=</span> np<span class="token punctuation">.</span>sqrt<span class="token punctuation">(</span>temp<span class="token punctuation">)</span>
+    <span class="token keyword">return</span> W
+
+<span class="token comment" spellcheck="true">#画图</span>
+<span class="token keyword">def</span> <span class="token function">draw</span><span class="token punctuation">(</span>C<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    colValue <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string">'r'</span><span class="token punctuation">,</span> <span class="token string">'y'</span><span class="token punctuation">,</span> <span class="token string">'g'</span><span class="token punctuation">,</span> <span class="token string">'b'</span><span class="token punctuation">,</span> <span class="token string">'c'</span><span class="token punctuation">,</span> <span class="token string">'k'</span><span class="token punctuation">,</span> <span class="token string">'m'</span><span class="token punctuation">]</span>
+    <span class="token keyword">for</span> i <span class="token keyword">in</span> range<span class="token punctuation">(</span>len<span class="token punctuation">(</span>C<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+        coo_X <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>    <span class="token comment" spellcheck="true">#x坐标列表</span>
+        coo_Y <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>    <span class="token comment" spellcheck="true">#y坐标列表</span>
+        <span class="token keyword">for</span> j <span class="token keyword">in</span> range<span class="token punctuation">(</span>len<span class="token punctuation">(</span>C<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+            coo_X<span class="token punctuation">.</span>append<span class="token punctuation">(</span>C<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+            coo_Y<span class="token punctuation">.</span>append<span class="token punctuation">(</span>C<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+        pl<span class="token punctuation">.</span>scatter<span class="token punctuation">(</span>coo_X<span class="token punctuation">,</span> coo_Y<span class="token punctuation">,</span> marker<span class="token operator">=</span><span class="token string">'x'</span><span class="token punctuation">,</span> color<span class="token operator">=</span>colValue<span class="token punctuation">[</span>i<span class="token operator">%</span>len<span class="token punctuation">(</span>colValue<span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">,</span> label<span class="token operator">=</span>i<span class="token punctuation">)</span>
+
+    pl<span class="token punctuation">.</span>legend<span class="token punctuation">(</span>loc<span class="token operator">=</span><span class="token string">'upper right'</span><span class="token punctuation">)</span>
+    pl<span class="token punctuation">.</span>show<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment" spellcheck="true">#数据集：每三个是一组分别是西瓜的编号，密度，含糖量</span>
+<span class="token keyword">if</span> __name__<span class="token operator">==</span><span class="token string">"__main__"</span><span class="token punctuation">:</span>
+    <span class="token comment" spellcheck="true"># data = </span><span class="token triple-quoted-string string">"""
+    # 1,0.697,0.46,2,0.774,0.376,3,0.634,0.264,4,0.608,0.318,5,0.556,0.215,
+    # 6,0.403,0.237,7,0.481,0.149,8,0.437,0.211,9,0.666,0.091,10,0.243,0.267,
+    # 11,0.245,0.057,12,0.343,0.099,13,0.639,0.161,14,0.657,0.198,15,0.36,0.37,
+    # 16,0.593,0.042,17,0.719,0.103,18,0.359,0.188,19,0.339,0.241,20,0.282,0.257,
+    # 21,0.748,0.232,22,0.714,0.346,23,0.483,0.312,24,0.478,0.437,25,0.525,0.369,
+    # 26,0.751,0.489,27,0.532,0.472,28,0.473,0.376,29,0.725,0.445,30,0.446,0.459"""</span>
+
+    <span class="token comment" spellcheck="true"># a = data.split(',')</span>
+    dataset <span class="token operator">=</span> pd<span class="token punctuation">.</span>read_pickle<span class="token punctuation">(</span><span class="token string">'PCA_embedding.pkl'</span><span class="token punctuation">)</span>
+    dataset <span class="token operator">=</span> np<span class="token punctuation">.</span>mat<span class="token punctuation">(</span>dataset<span class="token punctuation">)</span>
+    <span class="token comment" spellcheck="true"># dataset.astype(float)</span>
+    <span class="token comment" spellcheck="true"># dataset = np.mat([[float(a[i]), float(a[i+1])] for i in range(1, len(a)-1, 3)])</span>
+    dataset_old <span class="token operator">=</span> dataset<span class="token punctuation">.</span>copy<span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token keyword">print</span><span class="token punctuation">(</span>dataset<span class="token punctuation">.</span>shape<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+
+    som <span class="token operator">=</span> SOM<span class="token punctuation">(</span>dataset<span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token number">15</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token number">10</span><span class="token punctuation">,</span> <span class="token number">50</span><span class="token punctuation">)</span>
+    som<span class="token punctuation">.</span>train<span class="token punctuation">(</span><span class="token punctuation">)</span>
+    res <span class="token operator">=</span> som<span class="token punctuation">.</span>train_result<span class="token punctuation">(</span><span class="token punctuation">)</span>
+    classify <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+    <span class="token keyword">for</span> i<span class="token punctuation">,</span> win <span class="token keyword">in</span> enumerate<span class="token punctuation">(</span>res<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token keyword">if</span> <span class="token operator">not</span> classify<span class="token punctuation">.</span>get<span class="token punctuation">(</span>win<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+            classify<span class="token punctuation">.</span>setdefault<span class="token punctuation">(</span>win<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span>
+        <span class="token keyword">else</span><span class="token punctuation">:</span>
+            classify<span class="token punctuation">[</span>win<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">.</span>append<span class="token punctuation">(</span>i<span class="token punctuation">)</span>
+    C <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token comment" spellcheck="true">#未归一化的数据分类结果</span>
+    D <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token comment" spellcheck="true">#归一化的数据分类结果</span>
+    <span class="token keyword">for</span> i <span class="token keyword">in</span> classify<span class="token punctuation">.</span>values<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+        C<span class="token punctuation">.</span>append<span class="token punctuation">(</span>dataset_old<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span>tolist<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+        D<span class="token punctuation">.</span>append<span class="token punctuation">(</span>dataset<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span>tolist<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    draw<span class="token punctuation">(</span>C<span class="token punctuation">)</span>
+    draw<span class="token punctuation">(</span>D<span class="token punctuation">)</span></code></pre>
+<h3 id="2-4-算法结果"><a href="#2-4-算法结果" class="headerlink" title="2.4 算法结果"></a>2.4 算法结果</h3><p><img src="img6.png" alt=""></p>
+
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="http://broncokool.github.io" rel="external nofollow noreferrer">Yingshuai Kou</a>
+                </span>
+            </div>
+            <div class="reprint__type">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-link">
+                        文章链接:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="http://broncokool.github.io/2019/12/25/nlp-ju-lei-em-he-som-suan-fa/">http://broncokool.github.io/2019/12/25/nlp-ju-lei-em-he-som-suan-fa/</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。转载请注明来源
+                    <a href="http://broncokool.github.io" target="_blank">Yingshuai Kou</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E5%A4%84%E7%90%86/">
+                                    <span class="chip bg-color">自然语言处理</span>
+                                </a>
+                            
+                                <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">
+                                    <span class="chip bg-color">机器学习</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+
+<div id="article-share">
+    
+    
+    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+                <style>
+    #reward {
+        margin: 40px 0;
+        text-align: center;
+    }
+
+    #reward .reward-link {
+        font-size: 1.4rem;
+        line-height: 38px;
+    }
+
+    #reward .btn-floating:hover {
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2), 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    #rewardModal {
+        width: 320px;
+        height: 350px;
+    }
+
+    #rewardModal .reward-title {
+        margin: 15px auto;
+        padding-bottom: 5px;
+    }
+
+    #rewardModal .modal-content {
+        padding: 10px;
+    }
+
+    #rewardModal .close {
+        position: absolute;
+        right: 15px;
+        top: 15px;
+        color: rgba(0, 0, 0, 0.5);
+        font-size: 1.3rem;
+        line-height: 20px;
+        cursor: pointer;
+    }
+
+    #rewardModal .close:hover {
+        color: #ef5350;
+        transform: scale(1.3);
+        -moz-transform:scale(1.3);
+        -webkit-transform:scale(1.3);
+        -o-transform:scale(1.3);
+    }
+
+    #rewardModal .reward-tabs {
+        margin: 0 auto;
+        width: 210px;
+    }
+
+    .reward-tabs .tabs {
+        height: 38px;
+        margin: 10px auto;
+        padding-left: 0;
+    }
+
+    .reward-content ul {
+        padding-left: 0 !important;
+    }
+
+    .reward-tabs .tabs .tab {
+        height: 38px;
+        line-height: 38px;
+    }
+
+    .reward-tabs .tab a {
+        color: #fff;
+        background-color: #ccc;
+    }
+
+    .reward-tabs .tab a:hover {
+        background-color: #ccc;
+        color: #fff;
+    }
+
+    .reward-tabs .wechat-tab .active {
+        color: #fff !important;
+        background-color: #22AB38 !important;
+    }
+
+    .reward-tabs .alipay-tab .active {
+        color: #fff !important;
+        background-color: #019FE8 !important;
+    }
+
+    .reward-tabs .reward-img {
+        width: 210px;
+        height: 210px;
+    }
+</style>
+
+<div id="reward">
+    <a href="#rewardModal" class="reward-link modal-trigger btn-floating btn-medium waves-effect waves-light red">赏</a>
+
+    <!-- Modal Structure -->
+    <div id="rewardModal" class="modal">
+        <div class="modal-content">
+            <a class="close modal-close"><i class="fas fa-times"></i></a>
+            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <div class="reward-content">
+                <div class="reward-tabs">
+                    <ul class="tabs row">
+                        <li class="tab col s6 alipay-tab waves-effect waves-light"><a href="#alipay">支付宝</a></li>
+                        <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
+                    </ul>
+                    <div id="alipay">
+                        <img src="/medias/reward/alipay.jpg" class="reward-img" alt="支付宝打赏二维码">
+                    </div>
+                    <div id="wechat">
+                        <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $('.tabs').tabs();
+    });
+</script>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="far fa-dot-circle"></i>&nbsp;本篇
+            </div>
+            <div class="card">
+                <a href="/2019/12/25/nlp-ju-lei-em-he-som-suan-fa/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/11.jpg" class="responsive-img" alt="nlp聚类-EM和SOM算法">
+                        
+                        <span class="card-title">nlp聚类-EM和SOM算法</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            前言依旧是项目相关，前期调研了文本聚类的方法，现在开始着手实现基于模型的聚类方法，主要包括基于高斯混合模型的EM算法和基于神经网络的SOM算法，下面分别从原理和实现两方面介绍这两种算法。
+一 高斯混合模型EM算法1.1 高斯混合聚类k-me
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2019-12-25
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E5%A4%84%E7%90%86/" class="post-category">
+                                    自然语言处理
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E5%A4%84%E7%90%86/">
+                        <span class="chip bg-color">自然语言处理</span>
+                    </a>
+                    
+                    <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">
+                        <span class="chip bg-color">机器学习</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/2019/12/18/gcn-xue-xi/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/4.jpg" class="responsive-img" alt="GCN学习">
+                        
+                        <span class="card-title">GCN学习</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            一 图卷积神经网络的由来传统卷积神经网络对象是具有Euclidean domains data数据，该数据最显著的特征是具有规则的空间结构 ，如图片是规则的正方形，语音是规则的一维序列等，这些特征都可以用一维或二维的矩阵来表示，卷积神经网络
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2019-12-18
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" class="post-category">
+                                    机器学习
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/GCN/">
+                        <span class="chip bg-color">GCN</span>
+                    </a>
+                    
+                    <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">
+                        <span class="chip bg-color">机器学习</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+    
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+<!-- 代码块折行 -->
+
+<style type="text/css">
+code[class*="language-"], pre[class*="language-"] { white-space: pre !important; }
+</style>
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+<script src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+    MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$', '$'], ['\(', '\)']]}
+    });
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=default"></script>
+
+    <footer class="page-footer bg-color">
+    <div class="container row center-align" style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            <span id="year">2019</span>
+            <a href="http://broncokool.github.io" target="_blank">Yingshuai Kou</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+            
+            
+            
+            
+            
+            <span id="busuanzi_container_site_pv">
+                |&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;<span id="busuanzi_value_site_pv"
+                    class="white-color"></span>&nbsp;次
+            </span>
+            
+            
+            <span id="busuanzi_container_site_uv">
+                |&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;<span id="busuanzi_value_site_uv"
+                    class="white-color"></span>&nbsp;人
+            </span>
+            
+            <br>
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+    <a href="https://github.com/broncoKool" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:804971729@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=804971729" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 804971729" data-position="top" data-delay="50">
+        <i class="fab fa-qq"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="/atom.xml" class="tooltipped" target="_blank" data-tooltip="RSS 订阅" data-position="top" data-delay="50">
+        <i class="fas fa-rss"></i>
+    </a>
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script src="/js/search.js"></script>
+<script type="text/javascript">
+$(function () {
+    searchFunc("/" + "search.xml", 'searchInput', 'searchResult');
+});
+</script>
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    <script src="/libs/others/clicklove.js" async="async"></script>
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+</body>
+
+</html>

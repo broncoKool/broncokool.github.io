@@ -500,11 +500,19 @@
 <p>（2）定义graph上的convolution卷积</p>
 </blockquote>
 <h2 id="三-拉普拉斯矩阵"><a href="#三-拉普拉斯矩阵" class="headerlink" title="三 拉普拉斯矩阵"></a>三 拉普拉斯矩阵</h2><p>拉普拉斯矩阵（Laplacian matrix)）也叫做导纳矩阵、基尔霍夫矩阵或离散拉普拉斯算子，主要应用在图论中，作为一个图的矩阵表示。对于图 $G=(V,E)$ ，其Laplacian 矩阵的定义为 $L=D-A$ ，其中$L$  是Laplacian 矩阵， $D=diag(d)$是顶点的度矩阵（对角矩阵）,$d=rowSum(A)$，对角线上元素依次为各个顶点的度， $A $是图的邻接矩阵。</p>
+<blockquote>
+<p>度矩阵，节点的连边条数，对角阵，有向图可以分入度和出度</p>
+</blockquote>
+<p><img src="img0.png" alt=""></p>
+<blockquote>
+<p>邻接矩阵，节点的连接关系</p>
+</blockquote>
+<p><img src="img01.png" alt=""></p>
 <p>Graph Fourier Transformation及Graph Convolution的定义都用到图的拉普拉斯矩阵。</p>
 <p><strong>频域卷积的前提条件是图必须是无向图</strong>，只考虑无向图，那么$L$就是对称矩阵。</p>
 <p><img src="img1.png" alt=""></p>
 <h3 id="3-1-常用的拉普拉斯矩阵"><a href="#3-1-常用的拉普拉斯矩阵" class="headerlink" title="3.1 常用的拉普拉斯矩阵"></a>3.1 常用的拉普拉斯矩阵</h3><h4 id="普通形式的拉普拉斯矩阵"><a href="#普通形式的拉普拉斯矩阵" class="headerlink" title="普通形式的拉普拉斯矩阵"></a>普通形式的拉普拉斯矩阵</h4><p>$$<br>L=D-A<br>$$</p>
-<p>$L$中的元素给定为：<br>$$<br>L_{i,j}=<br>\begin{cases}<br>diag(v_i)\quad i=j\<br>-1 \quad i\neq j \;and \;v_i\;is\;adjacent\;to\;v_j\<br>0\quad otherwise<br>\end{cases}<br>$$<br>  其中$diag(vi)$ 表示顶点 $i$ 的度。 </p>
+<p>$L$中的元素给定为：<br>$$<br>L_{i,j}=<br>\begin{cases}<br>diag(v_i)\quad i=j \<br>-1 \quad i\neq j \;and \;v_i\;is\;adjacent\;to\;v_j\<br>0\quad otherwise<br>\end{cases}<br>$$<br>  其中$diag(vi)$ 表示顶点 $i$ 的度。 </p>
 <h4 id="对称归一化的拉普拉斯矩阵"><a href="#对称归一化的拉普拉斯矩阵" class="headerlink" title="对称归一化的拉普拉斯矩阵"></a>对称归一化的拉普拉斯矩阵</h4><p>$$<br>L^{sys}=D^{-1/2}LD^{-1/2}=I-D^{-1/2}AD^{-1/2}<br>$$</p>
 <p>矩阵元素定义为：<br>$$<br>L^{sys}_{i,j}=<br>\begin{cases}<br>1\quad i=j\;and\;diag(v_i)\neq 0\<br>-\frac{1}{ \sqrt { diag(v_i)diag(v_j) } } \quad i\neq j \;and \;v_i\;is\;adjacent\;to\;v_j\<br>0\quad otherwise<br>\end{cases}<br>$$<br>很多GCN论文应用的是这种拉普拉斯矩阵</p>
 <h4 id="随机游走归一化拉普拉斯矩阵（Random-walk-normalized-Laplacian）"><a href="#随机游走归一化拉普拉斯矩阵（Random-walk-normalized-Laplacian）" class="headerlink" title="随机游走归一化拉普拉斯矩阵（Random walk normalized Laplacian）"></a>随机游走归一化拉普拉斯矩阵（Random walk normalized Laplacian）</h4><p>$$<br>L^{rw}=D^{-1}L=I-D^{-1}A<br>$$</p>
@@ -554,8 +562,10 @@
 <p>注意，特征分解最右边的是特征矩阵的逆，只是拉普拉斯矩阵是对称矩阵才可以写成特征矩阵的转置。</p>
 <h3 id="3-5-拉普拉斯算子"><a href="#3-5-拉普拉斯算子" class="headerlink" title="3.5 拉普拉斯算子"></a>3.5 拉普拉斯算子</h3><p>定义：拉普拉斯算子是n维欧几里德空间中的一个二阶微分算子，定义为梯度$（∇f）$<br>的散度$（ \nabla \cdot f，即\nabla f \cdot f）$。因此如果$f$是二阶可微的实函数，则f的拉普拉斯算子$∆$定义为：<br>$$<br>∆f=\nabla^2 f=\nabla \cdot \nabla f<br>$$<br>$f$的拉普拉斯算子也是笛卡尔坐标系$x_i$中的所有非混合二阶偏导数：</p>
 <p>$$<br>∆f=\sum_{i=1}^n \frac{\partial^2f}{\partial x_i^2}<br>$$</p>
-<p>函数$f$的拉普拉斯算子也是该函数的海塞矩阵（是一个多元函数的二阶偏导数构成的方阵）的迹：<br>$$<br>∆f=tr(H(f))<br>$$<br>拉普拉斯算子（Laplacian operator）的物理意义是空间二阶导，准确定义是：标量梯度场中的散度，一般可用于描述物理量的流入流出。比如说在二维空间中的温度传播规律，一般可以用拉普拉斯算子来描述。</p>
+<p>函数$f$的拉普拉斯算子也是该函数的海塞矩阵（是一个多元函数的二阶偏导数构成的方阵）的迹：<br>$$<br>∆f=tr(H(f))<br>$$<br>拉普拉斯算子（Laplacian operator）的物理意义是<strong>空间二阶导</strong>，准确定义是：标量梯度场中的散度，一般可用于描述物理量的流入流出。比如说在二维空间中的温度传播规律，一般可以用拉普拉斯算子来描述。</p>
 <p>拉普拉斯矩阵也叫做离散的拉普拉斯算子。</p>
+<p>拉普拉斯算子在三维空间：</p>
+<p><img src="img02.png" alt=""></p>
 <h2 id="四-卷积"><a href="#四-卷积" class="headerlink" title="四 卷积"></a>四 卷积</h2><h3 id="4-1-连续形式的一维卷积"><a href="#4-1-连续形式的一维卷积" class="headerlink" title="4.1 连续形式的一维卷积"></a>4.1 连续形式的一维卷积</h3><p>  在泛函分析中，卷积是通过两个函数f(x)和g(x)生成第三个函数的一种算子，它代表的意义是：<strong>两个函数中的一个(取g(x)，可以任意取)函数，把g(x)经过翻转平移,然后与f(x)的相乘，得到的一个新的函数，对这个函数积分，也就是对这个新的函数求它所围成的曲边梯形的面积</strong>  </p>
 <p>设$f(t),g(t)$是两个可积函数，$f(t)与g(t)$的卷积记为$f(t)*g(t)$<br>$$<br>f(t)∗g(t)=∫^{−∞}_{+∞}f(τ)g(t−τ)dτ=∫^{−∞}_{+∞}f(t−τ)g(τ)dτ<br>$$<br><img src="img4.png" alt=""></p>
 <h3 id="4-2-离散形式的一维卷积"><a href="#4-2-离散形式的一维卷积" class="headerlink" title="4.2 离散形式的一维卷积"></a>4.2 离散形式的一维卷积</h3><p>对于定义在整数$Z$上的函数$f,g$,卷积定义为</p>
@@ -661,7 +671,7 @@
 <p>$$<br>(f∗g)G=Ug_θU^Tf<br>$$<br>有的地方，还把$g_θ=U^Tg$也成对角矩阵的形式，即定义一个滤波$g_θ=diag(U^Tg)$，则：  </p>
 <p><img src="img11.png" alt=""></p>
 <p>接下来第8节要介绍的图上频域卷积的工作，都是在$g_θ$的基础上做文章。  </p>
-<h3 id="七-为什么拉普拉斯矩阵的特征向量可以作为傅里叶变换的基？特征值表示频率？"><a href="#七-为什么拉普拉斯矩阵的特征向量可以作为傅里叶变换的基？特征值表示频率？" class="headerlink" title="七 为什么拉普拉斯矩阵的特征向量可以作为傅里叶变换的基？特征值表示频率？"></a>七 为什么拉普拉斯矩阵的特征向量可以作为傅里叶变换的基？特征值表示频率？</h3><p>在Chebyshev论文（M. Defferrard, X. Bresson, and P. Vandergheynst, “Convolutional neural networks on graphs with fast localized spectral filtering,”in Advances in Neural Information Processing Systems, 2016）中就有说明，图上进行傅里叶变换时，拉普拉斯矩阵是对称矩阵，所有有n个线性无关的特征向量，因此可以构成傅里叶变换的一组基，而其对应的特征值就是傅里叶变换的频率。</p>
+<h2 id="七-为什么拉普拉斯矩阵的特征向量可以作为傅里叶变换的基？特征值表示频率？"><a href="#七-为什么拉普拉斯矩阵的特征向量可以作为傅里叶变换的基？特征值表示频率？" class="headerlink" title="七 为什么拉普拉斯矩阵的特征向量可以作为傅里叶变换的基？特征值表示频率？"></a>七 为什么拉普拉斯矩阵的特征向量可以作为傅里叶变换的基？特征值表示频率？</h2><p>在Chebyshev论文（M. Defferrard, X. Bresson, and P. Vandergheynst, “Convolutional neural networks on graphs with fast localized spectral filtering,”in Advances in Neural Information Processing Systems, 2016）中就有说明，图上进行傅里叶变换时，拉普拉斯矩阵是对称矩阵，所有有n个线性无关的特征向量，因此可以构成傅里叶变换的一组基，而其对应的特征值就是傅里叶变换的频率。</p>
 <h3 id="7-1-为什么拉普拉斯矩阵的特征向量可以作为傅里叶变换的基？"><a href="#7-1-为什么拉普拉斯矩阵的特征向量可以作为傅里叶变换的基？" class="headerlink" title="7.1 为什么拉普拉斯矩阵的特征向量可以作为傅里叶变换的基？"></a>7.1 为什么拉普拉斯矩阵的特征向量可以作为傅里叶变换的基？</h3><p>傅里叶变换一个本质理解就是：把任意一个函数表示成了若干个正交函数（由sin,cos 构成）的线性组合。</p>
 <p><img src="img12.png" alt=""></p>
 <p>通过即$ f $在Graph上傅里叶逆变换的矩阵形式：$f=Uf^(b)$也能看出，graph傅里叶变换把graph上定义的任意向量$f$，表示成了拉普拉斯矩阵特征向量的线性组合，即：  </p>
@@ -690,6 +700,82 @@
 <p>第一代的参数方法存在着一些弊端，主要在于：<br>  （1）<strong>计算复杂</strong>：如果一个样本一个图，那么每个样本都需要进行图的拉普拉斯矩阵的特征分解求U矩阵计算复杂；每一次前向传播，都要计算$U,diag(θ_l) $   及S$U^T$三者的乘积，特别是对于大规模的graph，计算的代价较高，需要$O(n^2)$的计算复杂度  </p>
 <p>  （2）<strong>是非局部性连接的</strong><br>  （3）卷积核需要N个参数，当图中的节点N很大时是不可取的</p>
 <p>由于以上的缺点第二代的卷积核设计应运而生。</p>
+<h3 id="8-2-Chebyshev谱CNN（ChebNet）"><a href="#8-2-Chebyshev谱CNN（ChebNet）" class="headerlink" title="8.2 Chebyshev谱CNN（ChebNet）"></a>8.2 Chebyshev谱CNN（ChebNet）</h3><p>Chebyshev谱CNN源于论文（M. Defferrard, X. Bresson, and P. Vandergheynst, “Convolutional neural networks on graphs with fast localized spectral filtering,”in Advances in Neural Information Processing Systems, 2016）。Defferrard等人提出ChebNet，定义特征向量对角矩阵的切比雪夫多项式为滤波器，也就是<br>$$<br>g_θ​=g_θ​(Λ)≈∑^{K−1}_{i=0}​θ_i​T_k​(\tilde{Λ})<br>$$<br>其实，就是利用Chebyshev多项式拟合卷积核的方法，来降低计算复杂度。</p>
+<p>推导过程如下：<br>考虑信号$x∈R^N$（$x$就是graph上对应于每个顶点的feathure vector，即由数据集提取特征构成的向量，而不是和线性代数中常说的特征向量，注意区别）与以参数为 $θ∈R^N$ 的滤波器$g_θ=diag(θ)$在傅里叶域的谱卷积。<br>$$<br>g_θ​∗x=Ug_θ​U^Tx \qquad(3)<br>$$<br>其中</p>
+<ul>
+<li>U 是对称归一化的拉普拉斯（normalized graph Laplacian）算子$L=I_N−D^{−1/2}AD^{−1/2}=UΛU^T$的特征向量矩阵，Λ是由L的特征值构成的对角矩阵。</li>
+</ul>
+<p><img src="img17.png" alt=""></p>
+<p>由于normalized graph Laplacian矩阵L是实对称矩阵, 因此其特征向量矩阵U是正交矩阵,即<em>U<strong>U</strong>T</em>=<em>I**N</em></p>
+<ul>
+<li><p>$U^Tx$是$x$的傅里叶变换。</p>
+</li>
+<li><p>$g_θ$是由参数$θ$构成的对角矩阵$diag(θ)$。由于参数$θ$的确定与$L$的特征值有关,作者认为$g_θ$是特征值 $Λ$的一个函数，即令</p>
+</li>
+</ul>
+<p>$$<br>g_θ=g_θ(Λ)<br>$$</p>
+<p>式3的<strong>计算量很大</strong>，因为<strong>特征向量矩阵U 的复杂度</strong>是$O(N^2)$。此外，对于大型图来说，<strong>L特征值分解的计算量也很大</strong>。</p>
+<p>为了解决这个问题，<a href="https://hal.inria.fr/inria-00541855/document" target="_blank" rel="noopener">Hammond et al.(2011) ：Wavelets on graphs via spectral graph theory</a>指出$g_θ(Λ)$可以很好的通过Chebyshev多项式$T_k(x) $的$Kth$-阶截断展开来拟合，并<strong>对$Λ$进行scale使其元素位于$[−1,1]$</strong>：<br>$$<br>gθ​(Λ)≈∑^K_{k=0}​θ_k​T_K​(\tilde{Λ})\qquad(4)<br>$$<br>其中</p>
+<p><img src="img18.png" alt=""></p>
+<p>回到对信号x与滤波器$g_θ$的卷积的定义，现在有：<br>$$<br>g_θ∗x=∑^K_{k=0}θ_kT_K(\tilde{L})x\qquad(5)<br>$$<br>其中<br>$$<br>\tilde{L}=2L/λ_{max}−I_N=U\tildeΛU^T<br>$$<br>易证<br>$$<br>(UΛU^T)^k=UΛ^kU^T<br>$$<br>现在，相比于第一种Spectral CNN：</p>
+<ul>
+<li><p>此表达式现在是K-localized，具有局部连接性，因为它是拉普拉斯算子中的Kth-阶多项式，即它仅取决于离中央节点（Kth阶邻域）最大K步的节点</p>
+</li>
+<li><p><strong>$T_K(\tilde{L})x$的复杂度是O(|E|)</strong>，即与边数E呈线性关系，整个运算的复杂度是$O(K∣E∣)，$  当graph是稀疏图的时候，计算加速尤为明显，这个时候复杂度远低于$O(n^2) $ </p>
+<p>公式4到公式5的补充证明如下：<br>（1）先用数学归纳法证明<br>$$<br>UT_k​(\tildeΛ)U^T=T_k​(U\tildeΛU^T)<br>$$<br>数学归纳法思路：当n=1时显然成立，假设n=k时成立，只需证n=k+1时成立</p>
+</li>
+</ul>
+<p>证明：<br>根据切比雪夫多项式的定义, 已知</p>
+<p><img src="img19.png" alt=""></p>
+<p>  假设对于任意k&gt;1, 满足</p>
+<p>$$<br>UT_{k−2}(\tildeΛ)U^T=T_{k−2}(U\tildeΛU^T)<br>$$<br>与<br>$$<br>UT_{k−1}(\tildeΛ)U^T=T_{k−1}(U\tildeΛU^T)<br>$$<br>则</p>
+<p><img src="img20.png" alt=""></p>
+<p>因此,根据数学归纳法, 证毕。</p>
+<p>(2)已知<br>$$<br>\tilde{L}=U\tildeΛU^T<br>$$<br>  （3）将（1）、（2）两式带入卷积公式： </p>
+<p> <img src="img21.png" alt=""></p>
+<h3 id="8-3-CayleyNet"><a href="#8-3-CayleyNet" class="headerlink" title="8.3 CayleyNet"></a>8.3 CayleyNet</h3><p>CayleyNet进一步应用了参数有理复合函数的Cayley多项式来捕获窄的频带。CayleyNet的谱图卷积定义为<br>$$<br>x∗g_θ=c_0x+2Re \{ ∑^r_{j=1}c_j(hL−iI)^j(hL+iI)^{−j}x \}<br>$$<br>其中</p>
+<ul>
+<li>$Re(⋅)$为复数的实部</li>
+<li>$c_0$为实数</li>
+<li>$c_j$为复数</li>
+<li>$i$为虚数</li>
+<li>$h$为控制Cayley滤波器频谱的参数</li>
+</ul>
+<p>CayleyNet在保留空间局部性的同时，说明ChebNet可以看作是CayleyNet的一个特例。</p>
+<h3 id="8-4-一阶ChebNet（1stChebNet）-GCN"><a href="#8-4-一阶ChebNet（1stChebNet）-GCN" class="headerlink" title="8.4 一阶ChebNet（1stChebNet）-GCN"></a>8.4 一阶ChebNet（1stChebNet）-GCN</h3><p>一阶ChebNet源于论文（T. N. Kipf and M.Welling, “Semi-supervised classification with graph convolutional networks,” in Proceedings of the International Conference on Learning Representations, 2017）。这篇论文基于前面的工作，正式成为GCN的开山之作，后面很多变种都是基于这篇文章的。</p>
+<p>该篇论文贡献有两点：</p>
+<ul>
+<li><p>作者对于直接操作于图结构数据的网络模型根据频谱图卷积(Hammond等人于2011年提出的Wavelets on graphs via spectral graph theory)使用一阶近似简化计算的方法，提出了一种简单有效的层式传播方法。</p>
+</li>
+<li><p>作者验证了图结构神经网络模型可用于快速可扩展式的处理图数据中节点半监督分类问题，作者通过在一些公有数据集上验证了自己的方法的效率和准确率能够媲美现有的顶级半监督方法。</p>
+</li>
+</ul>
+<p>下面介绍ChebNet的一阶近似方法：</p>
+<p>Kipf等人引入了一种一阶近似ChebNet。假设$K=1$,$λ_{max}=2$  ,则ChebNet卷积公式简化近似为：<br>$$<br>x∗g_θ=θ_0x−θ_1D^{−1/2}AD^{−1/2}x<br>$$<br>为了抑制参数数量防止过拟合，1stChebNet假设$θ=θ_0=−θ_1 $ ,图卷积的定义就近似为（这是简单的一阶模型）：<br>$$<br>g_θ∗x=θ(I_N+D^{−1/2}AD^{−1/2})x<br>$$<br>其中</p>
+<ul>
+<li>$I_N+D^{−1/2}AD^{−1/2}$是有范围[0,2]的特征值。因此，如果在深度神经网络模型中使用该算子，则<strong>反复应用该算子会导致数值不稳定（发散）和梯度爆炸/消失</strong>。</li>
+</ul>
+<p>为了解决该问题, 引入了一个renormalization trick：</p>
+<p>其中</p>
+<ul>
+<li>$\tilde{A}=A+I_N,\tilde{D}_{ii}=∑_j\tilde{A}_{ij}$，即图中加上自环</li>
+</ul>
+<p>再加上一个激活函数，最后就可以得到了论文中的快速卷积公式：</p>
+<p>$$<br>H^{(l+1)}=f(H^l,A)=σ(\tilde{D}^{−1/2}\tilde{A}\tilde{D}^{−1/2}H^{(l)}W^{(l)})<br>$$</p>
+<ul>
+<li><p>W就是参数$θ$参数矩阵  </p>
+<p><strong>推广：特征映射公式</strong><br>可以将这个定义推广到具有C个输入通道（即每个节点的C维特征向量）的信号$X∈R^{N×C}$和 F 个滤波器或特征映射如下：  </p>
+</li>
+</ul>
+<p><img src="img22.png" alt=""></p>
+<p>其中</p>
+<ul>
+<li>$Θ∈R^{C×F} $是一个滤波器参数矩阵，其实就是参数矩阵W</li>
+<li>$Z∈R^{N×F} $ 是一次卷积的输出矩阵。</li>
+</ul>
+<p><strong>这个滤波操作复杂度是$O（∣E∣FC）$（其中E为边数，C为特征向量维度，F为卷积核数量），并且$\tilde{A}X$</strong>可以有效地实现为密集矩阵和稀疏矩阵的乘积。在源代码中使用了稀疏矩阵和稠密矩阵乘法）</p>
+<p>带一阶滤波器的多层图卷积网络（GCN）的结构图如下图所示。</p>
+<p><img src="img23.png" alt=""></p>
 
             </div>
             <hr/>
@@ -924,48 +1010,47 @@
 <article id="prenext-posts" class="prev-next articles">
     <div class="row article-row">
         
-        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
+        <div class="article col s12 m6" data-aos="fade-up">
             <div class="article-badge left-badge text-color">
-                <i class="far fa-dot-circle"></i>&nbsp;本篇
-            </div>
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
             <div class="card">
-                <a href="/2019/12/18/gcn-xue-xi/">
+                <a href="/2019/12/25/nlp-ju-lei-em-he-som-suan-fa/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/4.jpg" class="responsive-img" alt="GCN学习">
+                        <img src="/medias/featureimages/11.jpg" class="responsive-img" alt="nlp聚类-EM和SOM算法">
                         
-                        <span class="card-title">GCN学习</span>
+                        <span class="card-title">nlp聚类-EM和SOM算法</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            一 图卷积神经网络的由来传统卷积神经网络对象是具有Euclidean domains data数据，该数据最显著的特征是具有规则的空间结构 ，如图片是规则的正方形，语音是规则的一维序列等，这些特征都可以用一维或二维的矩阵来表示，卷积神经网络
+                            前言依旧是项目相关，前期调研了文本聚类的方法，现在开始着手实现基于模型的聚类方法，主要包括基于高斯混合模型的EM算法和基于神经网络的SOM算法，下面分别从原理和实现两方面介绍这两种算法。
+一 高斯混合模型EM算法1.1 高斯混合聚类k-me
                         
                     </div>
                     <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2019-12-18
-                            </span>
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2019-12-25
+                        </span>
                         <span class="publish-author">
                             
                             <i class="fas fa-bookmark fa-fw icon-category"></i>
                             
-                            <a href="/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" class="post-category">
-                                    机器学习
+                            <a href="/categories/%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E5%A4%84%E7%90%86/" class="post-category">
+                                    自然语言处理
                                 </a>
                             
                             
                         </span>
                     </div>
                 </div>
-
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/GCN/">
-                        <span class="chip bg-color">GCN</span>
+                    <a href="/tags/%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E5%A4%84%E7%90%86/">
+                        <span class="chip bg-color">自然语言处理</span>
                     </a>
                     
                     <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">
