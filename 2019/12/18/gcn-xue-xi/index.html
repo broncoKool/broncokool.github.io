@@ -776,6 +776,118 @@
 <p><strong>这个滤波操作复杂度是$O（∣E∣FC）$（其中E为边数，C为特征向量维度，F为卷积核数量），并且$\tilde{A}X$</strong>可以有效地实现为密集矩阵和稀疏矩阵的乘积。在源代码中使用了稀疏矩阵和稠密矩阵乘法）</p>
 <p>带一阶滤波器的多层图卷积网络（GCN）的结构图如下图所示。</p>
 <p><img src="img23.png" alt=""></p>
+<p>在看了上面的公式以及论文中的训练方法之后，并没有觉得GCN有多么特别，无非就是一个设计巧妙的公式，也许不用这么复杂的公式，多加一点训练数据或者把模型做深，也可能达到媲美的效果呢。</p>
+<p>最后论文的附录里提到“even an untrained GCN model with random weights can serve as a powerful feature extractor for nodes in a graph”，可见即使不训练，完全使用随机初始化的参数W，GCN提取出来的特征就已经十分优秀了！这跟CNN不训练是完全不一样的，CNN不训练是根本得不到什么有效特征的。</p>
+<p>然后作者做了一个实验，使用一个俱乐部会员的关系网络，使用随机初始化的GCN进行特征提取，得到各个node的embedding，然后可视化：</p>
+<p><img src="img24.png" alt=""></p>
+<p><img src="img25.png" alt=""></p>
+<p>可以发现，在原数据中同类别的node，经过GCN的提取出的embedding，已经在空间上自动聚类了。</p>
+<p>而这种聚类结果，可以和DeepWalk、node2vec这种经过复杂训练得到的node embedding的效果媲美了。</p>
+<p>作者接着给每一类的node，提供仅仅一个标注样本，然后去训练，得到的可视化效果如下：</p>
+<p><img src="gif10.png" alt=""></p>
+<p>  关于1stChebNet CGN的更多细节，可以参考博客：<br> <a href="https://blog.csdn.net/yyl424525/article/details/98724104" target="_blank" rel="noopener">Semi-Supervised Classification with Graph Convolutional Networks用图卷积进行半监督分类</a>  </p>
+<h5 id="GCN的优点"><a href="#GCN的优点" class="headerlink" title="GCN的优点"></a>GCN的优点</h5><ol>
+<li><strong>权值共享，参数共享</strong>，从$AXW$可以看出每一个节点的参数矩阵都是W，权值共享； </li>
+<li>具有局部性Local Connectivity，也就是局部连接的，因为每次聚合的只是一阶邻居；<br>上述两个特征也是CNN中进行参数减少的核心思想</li>
+<li>感受野正比于卷积层层数，第一层的节点只包含与直接相邻节点有关的信息，第二层以后，每个节点还包含相邻节点的相邻节点的信息，这样的话，参与运算的信息就会变多。层数越多，感受野越大，参与运算的信息量越充分。也就是说随着卷积层的增加，从远处邻居的信息也会逐渐聚集过来。</li>
+<li>复杂度大大降低，不用再计算拉普拉斯矩阵，特征分解</li>
+</ol>
+<h5 id="GCN的不足"><a href="#GCN的不足" class="headerlink" title="GCN的不足"></a>GCN的不足</h5><ol>
+<li><strong>扩展性差</strong>：由于训练时需要需要知道关于训练节点、测试节点在内的所有节点的邻接矩阵$A$，因此是transductive的，不能处理大图，然而工程实践中几乎面临的都是大图问题，因此在扩展性问题上局限很大，为了解决transductive的的问题，  <a href="https://blog.csdn.net/yyl424525/article/details/100532849" target="_blank" rel="noopener">GraphSAGE：Inductive Representation Learning on Large Graphs</a> 被提出；  </li>
+<li>GCN论文中表明，目前GCN只局限于浅层，实验中使用2层GCN效果最好，为了加深，需要使用残差连接等trick，但是即使使用了这些trick，也只能勉强保存性能不下降，并没有提高，  <a href="https://blog.csdn.net/yyl424525/article/details/101024591" target="_blank" rel="noopener">Deeper Insights into Graph Convolutional Networks for Semi-Supervised Learning</a>一文也针对When GCNs Fail ？这个问题进行了分析 。虽然有一篇论文：  <a href="https://blog.csdn.net/yyl424525/article/details/99464457" target="_blank" rel="noopener">DeepGCNs-Can GCNs Go as Deep as CNNs?</a>  就是解决GCN局限于浅层的这个问题的，但个人觉得并没有解决实质性的问题，这方面还有值得研究的空间。 </li>
+<li><strong>不能处理有向图</strong>  理由很简单，推导过程中用到拉普拉斯矩阵的特征分解需要满足拉普拉斯矩阵是对称矩阵的条件；</li>
+</ol>
+<h2 id="九-GCN的改进"><a href="#九-GCN的改进" class="headerlink" title="九 GCN的改进"></a>九 GCN的改进</h2><h3 id="9-1-邻接矩阵的探索"><a href="#9-1-邻接矩阵的探索" class="headerlink" title="9.1 邻接矩阵的探索"></a>9.1 邻接矩阵的探索</h3><h4 id="Adaptive-Graph-Convolution-Network-（AGCN）"><a href="#Adaptive-Graph-Convolution-Network-（AGCN）" class="headerlink" title="Adaptive Graph Convolution Network （AGCN）"></a>Adaptive Graph Convolution Network （AGCN）</h4><p>自适应GCN（AGCN）为了探索图拉普拉斯矩阵为指明的隐藏结构，(R. Li, S. Wang, F. Zhu, and J. Huang, “Adaptive graph convolutional neural networks,” in Proceedings of the AAAI Conference on Artificial Intelligence, 2018）提出了自适应图卷积网络（AGCN）。AGCN利用所谓的残差图来扩充图，残差图是通过计算节点对的距离来构造的。尽管AGCN能够捕获互补关系信息，但是以$O(N^2)$的计算量为代价。自适应图卷积网络（AGCN）通过图的邻接矩阵学习未知的隐藏结构关系。它通过一个以两个节点的特征为输入的可学习的距离函数来构造一个所谓的残差图邻接矩阵。</p>
+<h4 id="Dual-Graph-Convolutional-Network-DGCN"><a href="#Dual-Graph-Convolutional-Network-DGCN" class="headerlink" title="Dual Graph Convolutional Network(DGCN)"></a>Dual Graph Convolutional Network(DGCN)</h4><p>对偶图卷积网络（DGCN）引入了一种对偶图卷积结构，该结构具有两个并行的图卷积层。虽然这些对偶层共享参数,他们使用归一化了的邻接矩阵Ā和归一化了的积极点态互信息(PPMI)的共生矩阵提取节点随机游走。DGCN通过对偶图卷积层的集成输出，无需叠加多个图卷积层即可捕获局部和全局结构信息。</p>
+<h3 id="9-2-空间域的GCNs（ConvGNNs）"><a href="#9-2-空间域的GCNs（ConvGNNs）" class="headerlink" title="9.2 空间域的GCNs（ConvGNNs）"></a>9.2 空间域的GCNs（ConvGNNs）</h3><h4 id="Neural-Network-for-Graphs-NN4G"><a href="#Neural-Network-for-Graphs-NN4G" class="headerlink" title="Neural Network for Graphs (NN4G)"></a>Neural Network for Graphs (NN4G)</h4><p>NN4G是第一个提出的基于空间的ConvGNNs。NN4G通过直接累加节点的邻域信息来实现图的卷积。它还应用剩余连接和跳跃连接来记忆每一层的信息。因此，NN4G的下一层节点状态为</p>
+<p><img src="img26.png" alt=""></p>
+<ul>
+<li><p>f(⋅)是激活函数</p>
+</li>
+<li><p>$ h_v^{(0)}=0  $</p>
+</li>
+</ul>
+<p>上式也可以写出矩阵的形式</p>
+<p><img src="img27.png" alt=""></p>
+<p>可以看出，形式和GCN类似。主要区别在于NN4G使用了非标准化邻接矩阵，这可能会导致数值不稳定问题。</p>
+<h4 id="Contextual-Graph-Markov-Model-CGMM"><a href="#Contextual-Graph-Markov-Model-CGMM" class="headerlink" title="Contextual Graph Markov Model (CGMM)"></a>Contextual Graph Markov Model (CGMM)</h4><p>CGMM提出了一种基于NN4G的概率模型。在保持空间局部性的同时，CGMM还具有概率可解释性。</p>
+<h4 id="Diffusion-Convolutional-Neural-Network-DCNN-扩散卷积神经网络"><a href="#Diffusion-Convolutional-Neural-Network-DCNN-扩散卷积神经网络" class="headerlink" title="Diffusion Convolutional Neural Network (DCNN)扩散卷积神经网络"></a>Diffusion Convolutional Neural Network (DCNN)扩散卷积神经网络</h4><p>DCNN将图卷积看作一个扩散过程。它假设信息以一定的转移概率从一个节点转移到相邻的一个节点，使信息分布在几轮后达到均衡。DCNN将扩散图卷积定义为</p>
+<p><img src="img28.png" alt=""></p>
+<h4 id="Diffusion-Graph-Convolution-DGC-扩散图卷积"><a href="#Diffusion-Graph-Convolution-DGC-扩散图卷积" class="headerlink" title="Diffusion Graph Convolution(DGC) 扩散图卷积"></a>Diffusion Graph Convolution(DGC) 扩散图卷积</h4><p>由于DCNN扩散过程的平稳分布是概率转移矩阵的幂级数的总和，因此扩散图卷积(Diffusion Graph Convolution, DGC)将每个扩散步骤的输出相加，而不是拼接。它定义扩散图卷积为</p>
+<p><img src="img29.png" alt=""></p>
+<p>利用转移概率矩阵的幂意味着，遥远的邻居对中心节点提供的信息非常少。</p>
+<h4 id="PGC-DGCNN"><a href="#PGC-DGCNN" class="headerlink" title="PGC-DGCNN"></a>PGC-DGCNN</h4><p>PGC-DGCNN（On filter size in graph convolutional networks ，SSCI 2018）增加了基于最短路径的远距离邻居的贡献。它定义了一个最短路径邻接矩阵$S^{(j)}$。  如果从节点$v$到节点$u$的最短路径长度为$j$，则$S_{v,u}^{(j)}=1$，否则为0。PGC-DGCNN使用超参数r控制感受域的大小，引入了一个图卷积操作，如下所示  </p>
+<p><img src="img30.png" alt=""></p>
+<h4 id="Partition-Graph-Convolution-PGC"><a href="#Partition-Graph-Convolution-PGC" class="headerlink" title="Partition Graph Convolution (PGC)"></a>Partition Graph Convolution (PGC)</h4><p>PGC（Spatial temporal graph convolutional networks for skeleton-based action recognition，AAAI 2018）根据不局限于最短路径的特定条件将一个节点的邻居划分为Q<br>Q组。PGC根据每个组定义的邻域构造QQ邻接矩阵。然后，PGC将不同参数矩阵的GCN应用到每个邻居组，并将结果进行求和:</p>
+<p><img src="img31.png" alt=""></p>
+<h4 id="Message-Passing-Neural-Networks-MPNN-信息传递神经网络"><a href="#Message-Passing-Neural-Networks-MPNN-信息传递神经网络" class="headerlink" title="Message Passing Neural Networks (MPNN) 信息传递神经网络"></a>Message Passing Neural Networks (MPNN) 信息传递神经网络</h4><p>信息传递神经网络(MPNNs)(Neural message passing for quantum chemistry,ICML 2017)概述了基于空间的卷积神经网络的一般框架。它把图卷积看作一个信息传递过程，信息可以沿着边直接从一个节点传递到另一个节点。MPNN运行K-step消息传递迭代，让信息进一步传播。定义消息传递函数(即空间图卷积)为</p>
+<p><img src="img32.png" alt=""></p>
+<p> 在得到每个节点的隐含表示后，可以将$h_v^{(k)}$传递给输出层来执行节点级的预测任务，或者传递给readout函数来执行图级的预测任务。readout函数基于节点隐含表示生成整个图的表示。它通常被定义为  </p>
+<p><img src="img33.png" alt=""></p>
+<p>通过假设$U_k(⋅)$、$M_k(⋅)$、$R(⋅)$的不同形式，如GCN、（Convolutional networks on graphs for learning molecular fingerprints，NIPS  2015）、（Molecular graph convolutions: moving beyond  fingerprints，2016）、（Quantum-chemical insights from deep tensor neural  networks，2017 Nature communications）等，MPNN可以覆盖很多现有的GNN。  </p>
+<h5 id="Graph-Isomorphism-Network-GIN-图同构网络"><a href="#Graph-Isomorphism-Network-GIN-图同构网络" class="headerlink" title="Graph Isomorphism Network (GIN) 图同构网络"></a>Graph Isomorphism Network (GIN) 图同构网络</h5><p>然而，图同构网络(GIN)发现，MPNN框架下的方法不能根据生成的图embedding来区分不同的图结构。为了修正这个缺点，GIN通过一个可学习的参数$ϵ(k)$调整中心节点的权重。它通过下式来计算图卷积</p>
+<p><img src="img34.png" alt=""></p>
+<h4 id="GraphSage"><a href="#GraphSage" class="headerlink" title="GraphSage"></a>GraphSage</h4><p>由于一个节点的邻居数量可能从1个到1000个甚至更多，因此获取一个节点邻居的完整大小是低效的。GraphSage(Inductive representation learning on large graphs，NIPS 2017)引入聚合函数的概念定义图形卷积。聚合函数本质上是聚合节点的邻域信息，需要满足对节点顺序的排列保持不变，例如均值函数，求和函数，最大值函数都对节点的顺序没有要求。图的卷积运算定义为:</p>
+<p><img src="img35.png" alt=""></p>
+<p>GraphSage没有更新所有节点上的状态，而是提出了一种batch训练算法，提高了大型图的可扩展性。GraphSage的学习过程分为三个步骤。首先，对一个节点的K-跳邻居节点取样，然后，通过聚合其邻居节的信息表示中心节点的最终状态，最后，利用中心节点的最终状态做预测和误差反向传播。如图所示k-hop,从中心节点跳几步到达的顶点。</p>
+<p><img src="img36.png" alt=""></p>
+<p>  假设在第t-hop取样的邻居个数是<em>s**t</em>st，GraphSage一个batch的时间复杂度是$O(∏_{t=1}^Ts_t)$。因此随着<em>t</em>t的增加计算量呈指数增加，这限制了GraphSage朝深入的框架发展。但是实践中，作者发现$t=2$已经能够获得很高的性能。  </p>
+<p>Graph Attention Network (GAT)图注意力网络</p>
+<p>图注意网络(GAT)(ICLR 2017,Graph attention networks)假设相邻节点对中心节点的贡献既不像GraphSage一样相同，也不像GCN那样预先确定(这种差异如图4所示)。GAT在聚合节点的邻居信息的时候使用注意力机制确定每个邻居节点对中心节点的重要性，也就是权重。定义图卷积操作如下：</p>
+<p><img src="img37.png" alt=""></p>
+<p>  softmax函数确保节点<em>v</em>v的所有邻居的注意权值之和为1。GAT进一步使用multi-head注意力方式，并使用||concat方式对不同注意力节点进行整合，提高了模型的表达能力。这表明在节点分类任务上比GraphSage有了显著的改进。  </p>
+<p><img src="img38.png" alt=""></p>
+<p>图4展示了GCN和GAN在聚合邻居节点信息时候的不同。</p>
+<p>（a）图卷积网络GCN(2017,Semi-supervised classification with graph convolutional networks)在聚集过程中很清楚地分配了一个非参数的权重$aij=\frac1{ \sqrt{ deg(vi)deg(vj) } }$给$v_i$的邻居$v_j$<br>（b）图注意力网络GAT(ICLR 2017,Graph attention networks)通过端到端的神经网络结构隐式地捕获$a_{ij}$<br>$a_{ij}$的权重，以便更重要的节点获得更大的权重。</p>
+<h4 id="Gated-Attention-Network-GAAN-门控注意力网络"><a href="#Gated-Attention-Network-GAAN-门控注意力网络" class="headerlink" title="Gated Attention Network (GAAN)-门控注意力网络"></a>Gated Attention Network (GAAN)-门控注意力网络</h4><p>GAAN(Gaan:Gated attention networks for learning on large and spatiotemporal graphs,2018)也利用multi-head注意力的方式更新节点的隐层状态。与GAT为各种注意力设置相同的权重进行整合的方式不同，GAAN引入self-attention机制对每一个head，也就是每一种注意力，计算不同的权重，规则如下:</p>
+<p><img src="img39.png" alt=""></p>
+<p>GeniePath除了在空间上应用了图注意力之外，还提出了一种类似于LSTM的门控机制来控制跨图卷积层的信息流。还有其他一些有趣的图注意模型（Graph classification using structural attention，KDD 18）、（Watch your step: Learning node embeddings via graph attention，NeurIPS,2018）。但是，它们不属于ConvGNN框架。</p>
+<h4 id="Mixture-Model-Network-MoNet"><a href="#Mixture-Model-Network-MoNet" class="headerlink" title="Mixture Model Network (MoNet)"></a>Mixture Model Network (MoNet)</h4><p>混合模型网络MoNet(Geometric deep learning on graphs and manifolds using mixture model cnns ,CVPR 2017)采用了一种不同的方法来为一个节点的邻居分配不同的权值。它引入节点伪坐标来确定一个节点与其邻居之间的相对位置。一旦知道了两个节点之间的相对位置，权重函数就会将相对位置映射到这两个节点之间的相对权重。通过这种方式，可以在不同的位置共享图数据过滤器的参数。在MoNet框架下，现有的几种流形处理方法，如Geodesic CNN (GCNN)、Anisotropic CNN (各向异性CNN，ACNN)、Spline CNN，以及针对图的处理方法GCN、DCNN等，都可以通过构造非参数权函数将其推广为MoNet的特殊实例。此外，MoNet还提出了一个具有可学习参数的高斯核函数来自适应地学习权值函数。</p>
+<h4 id="PATCHY-SAN"><a href="#PATCHY-SAN" class="headerlink" title="PATCHY-SAN"></a>PATCHY-SAN</h4><p>另一种不同的工作方式是根据特定的标准对节点的邻居进行排序，并将每个排序与一个可学习的权重关联起来，从而实现跨不同位置的权重共享。PATCHY-SAN(Learning convolutional neural networks for graphs，ICML 2016)根据每个节点的图标签对邻居排序，并选择最上面的q个邻居。图标记实质上是节点得分，可以通过节点度、中心度、Weisfeiler-Lehman颜色等得到。由于每个节点现在有固定数量的有序邻居，因此可以将图形结构的数据转换为网格结构的数据。PATCHY-SAN应用了一个标准的一维卷积滤波器来聚合邻域特征信息，其中该滤波器的权值的顺序对应于一个节点的邻居的顺序。PATCHY-SAN的排序准则只考虑图的结构，这就需要大量的计算来处理数据。GCNs中利用标准CNN能过保持平移不变性，仅依赖于排序函数。因此，节点选择和排序的标准至关重要。PATCHY-SAN中，排序是基于图标记的，但是图标记值考虑了图结构，忽略了节点的特征信息。</p>
+<h4 id="Large-scale-Graph-Convolution-Networks-LGCN"><a href="#Large-scale-Graph-Convolution-Networks-LGCN" class="headerlink" title="Large-scale Graph Convolution Networks (LGCN)"></a>Large-scale Graph Convolution Networks (LGCN)</h4><p>LGCN(Large-scale learnable graph convolutional networks,SIGKDD 2018)提出了一种基于节点特征信息对节点的邻居进行排序的方法。对于每个节点，LGCN集成其邻居节点的特征矩阵，并沿着特征矩阵的每一列进行排序，排序后的特征矩阵的前k行作为目标节点的输入网格数据。最后LGCN对合成输入进行1D-CNN得到目标节点的隐含输入。PATCHY-SAN中得到图标记需要复杂的预处理，但是LGCN不需要，所以更高效。LGCN提出一个子图训练策略以适应于大规模图场景，做法是将采样的小图作为mini-batch。</p>
+<h4 id="GraphSAGE"><a href="#GraphSAGE" class="headerlink" title="GraphSAGE"></a>GraphSAGE</h4><p>通常GCN这样的训练函数需要将整个图数据和所有节点中间状态保存到内存中。特别是当一个图包含数百万个节点时，针对ConvGNNs的full-batch训练算法受到内存溢出问题的严重影响。为了节省内存，GraphSage提出了一种batch训练算法。它将节点看作一棵树的根节点，然后通过递归地进行K步邻域扩展，扩展时保持采样大小固定不变。对于每一棵采样树，GraphSage通过从下到上的层次聚集隐含节点表示来计算根节点的隐含表示。</p>
+<h4 id="FastGCN"><a href="#FastGCN" class="headerlink" title="FastGCN"></a>FastGCN</h4><p>FastGCN（fast learning with graph convolutional networks via importance sampling，ICLR 2018）对每个图卷积层采样固定数量的节点，而不是像GraphSage那样对每个节点采样固定数量的邻居。它将图卷积理解为节点embedding函数在概率测度下的积分变换。采用蒙特卡罗近似和方差减少技术来简化训练过程。由于FastGCN对每个层独立地采样节点，层之间的连接可能是稀疏的。</p>
+<h4 id="AS-GCN"><a href="#AS-GCN" class="headerlink" title="AS-GCN"></a>AS-GCN</h4><p>AS-GCN（Adaptive Sampling Towards Fast Graph Representation Learning，NeurIPS 2018）提出了一种自适应分层采样方法，其中下层的节点根据上层节点为条件进行采样。与FastGCN相比，该方法以采用更复杂的采样方案为代价，获得了更高的精度。</p>
+<h4 id="StoGCN（或VR-GCN）"><a href="#StoGCN（或VR-GCN）" class="headerlink" title="StoGCN（或VR-GCN）"></a>StoGCN（或VR-GCN）</h4><p>StoGCN（Stochastic training of graph convolutional networks with variance reduction，VR-GCN，ICML 2018）的随机训练使用历史节点表示作为控制变量，将图卷积的感知域大小降低到任意小的范围。即使每个节点有两个邻居，StoGCN的性能也不相上下。但是，StoGCN仍然必须保存所有节点中间状态，这对于大型图数据来说是消耗内存的。</p>
+<p>注：VR-GCN是ClusterGCN中的叫法。</p>
+<h4 id="Cluster-GCN"><a href="#Cluster-GCN" class="headerlink" title="Cluster-GCN"></a>Cluster-GCN</h4><p>Cluster-GCN使用图聚类算法对一个子图进行采样，并对采样的子图中的节点执行图卷积。由于邻域搜索也被限制在采样的子图中，所以Cluster-GCN能够同时处理更大的图和使用更深层次的体系结构，用更少的时间和更少的内存。值得注意的是，Cluster-GCN为现有的ConvGNN训练算法提供了时间复杂度和内存复杂度的直接比较。</p>
+<h2 id="十一-GCN代码分析和数据集Cora、Pubmed、Citeseer格式"><a href="#十一-GCN代码分析和数据集Cora、Pubmed、Citeseer格式" class="headerlink" title="十一 GCN代码分析和数据集Cora、Pubmed、Citeseer格式"></a>十一 GCN代码分析和数据集Cora、Pubmed、Citeseer格式</h2><p>篇幅较长，数据集格式，见另下一篇：<a href="https://blog.csdn.net/yyl424525/article/details/100831452" target="_blank" rel="noopener">GCN使用的数据集Cora、Citeseer、Pubmed、Tox21格式 </a></p>
+<p>篇幅较长，代码分析见另一篇：<a href="https://blog.csdn.net/yyl424525/article/details/100634211" target="_blank" rel="noopener">图卷积网络GCN代码分析（Tensorflow版）</a></p>
+<h2 id="十二-从空间角度理解GCN"><a href="#十二-从空间角度理解GCN" class="headerlink" title="十二 从空间角度理解GCN"></a>十二 从空间角度理解GCN</h2><p>前面介绍了GCN谱方法的推导以及背后的思路等，这是一种比较严谨和理论的方法。但是，其实可以发现，在傅立叶域上定义出来的GCN操作，其实也可以在空间域上进行理解，其就是所谓的消息传递机制，或者说每次从邻居中聚集信息然后对中心节点进行更新。</p>
+<p>如下图所示，红色节点S1的邻居正是蓝色节点B1,B2,B3，这些邻居节点根据一定的规则将信息，也就是特征，汇总到红色节点上。</p>
+<p>  <img src="img40.png" alt=""></p>
+<p><img src="img41.png" alt=""></p>
+<p>不难发现，其实HW的结果乘上邻接矩阵A的目的其实在于选在一阶邻居节点，其实本质就是在于邻居节点的信息传递。但是上式还可以进行一些改进，比如信息聚合时没有考虑节点自己的信息，因此可以在图中<strong>加入一个自环</strong>，邻接矩阵变为  </p>
+<p><img src="img42.png" alt=""></p>
+<p>还是考虑此图</p>
+<p><img src="img43.png" alt=""></p>
+<p><img src="img44.png" alt=""></p>
+<p>则归一化以后</p>
+<p><img src="img45.png" alt=""></p>
+<p>  上式对邻接矩阵进行了标准化，这个标准化称之为random walk normalization。然而，在实际中，动态特性更为重要，因此经常使用的是renormalization（GCN论文中的叫法）：  </p>
+<p><img src="img46.png" alt=""></p>
+<p>  renormalization后有：  </p>
+<p><img src="img47.png" alt=""></p>
+<p>这就是GCN用谱方法推导出来的公式，这样就可以从空间结构的角度理解一阶ChebNet（GCN）了。</p>
+<h2 id="十三-GCN处理不同类型的图"><a href="#十三-GCN处理不同类型的图" class="headerlink" title="十三 GCN处理不同类型的图"></a>十三 GCN处理不同类型的图</h2><h3 id="关于带权图问题"><a href="#关于带权图问题" class="headerlink" title="关于带权图问题"></a>关于带权图问题</h3><p>GCN论文里的针对的是无权的无向图，并且采用的是平均聚合的方法，邻居之间没有权重。但是，现实生活中更多的是带权图。比如，我们都认识马化腾，但是张志东与马化腾的亲密度要比我们和马化腾的亲密度高得多。因此，可以预测张志东的工资比我们更接近马化腾。</p>
+<p>不过GCN还是可以直接处理带权图，原来的邻居矩阵取值只能是0和1，现在可以取更多的权值。</p>
+<h3 id="关于有向图问题"><a href="#关于有向图问题" class="headerlink" title="关于有向图问题"></a>关于有向图问题</h3><p>前面的都是针对于无向图的问题，所有拉普拉斯矩阵是对称矩阵，但是在有向图中，就不能定义拉普拉斯矩阵了。目前的两种解决思路：<br>（a）要想保持理论上的完美，就需要重新定义图的邻接关系，保持对称性<br>比如这篇文章MotifNet: a motif-based Graph Convolutional Network for directed graphs<br>提出利用Graph Motifs定义图的邻接矩阵。</p>
+<p>（b）个人认为基于空间域的GCNs都可以处理有向图，比如GraphSAGE、GAT等，聚合邻居信息时根据有向边判断是否是邻居即可</p>
+<h3 id="节点没有特征的图"><a href="#节点没有特征的图" class="headerlink" title="节点没有特征的图"></a>节点没有特征的图</h3><p>对于很多网络，可能没有节点的特征，这个时候也是可以使用GCN的，如论文中作者对那个俱乐部网络，采用的方法就是用单位矩阵 I替换特征矩阵X，有的地方也用节点度作为节点特征。</p>
+<h2 id="十四-问题讨论"><a href="#十四-问题讨论" class="headerlink" title="十四 问题讨论"></a>十四 问题讨论</h2><p>下面将总结一些常见的问题和回答，欢迎大佬们一起讨论</p>
+<h3 id="Q1：GCN中邻接矩阵为什么要归一化？"><a href="#Q1：GCN中邻接矩阵为什么要归一化？" class="headerlink" title="Q1：GCN中邻接矩阵为什么要归一化？"></a>Q1：GCN中邻接矩阵为什么要归一化？</h3><p>看前面的例子</p>
+<p><img src="img48.png" alt=""></p>
+<p>  显然， $ \tilde{D}^{−1}\tilde{A}X  $<strong>归一化对邻居取平均值</strong>。  </p>
+<p><img src="img49.png" alt=""></p>
+<p>举个例子，如果把『我』看成当前节点，『我的朋友』看做『我』的相邻节点，要估算『我的工资』该怎么做呢？对邻居节点的工资进行加权后是求和，不能估算『我的工资』，求和的方式可能出现一个低端交际花员工的工资比一个朋友较少的大佬的工资更高。因此，进行归一化（<em>D</em>−1<em>A</em></p>
+<h3 id="Q2-GCN中邻接矩阵为什么要renormalization？"><a href="#Q2-GCN中邻接矩阵为什么要renormalization？" class="headerlink" title="Q2:GCN中邻接矩阵为什么要renormalization？"></a>Q2:GCN中邻接矩阵为什么要renormalization？</h3><p>还是看前面的例子</p>
+<p><img src="img50.png" alt=""></p>
+<p>网上很多地方把上面这个叫做对称归一化，从例子中可以看出<em>A</em>˜=<em>D</em>˜−1/2<em>A</em>˜<em>D</em>−1/2确实是对称的，但是行和列都没有归一化，论文中叫renormalization，本人提议各大网友不要再叫对称归一化，容易误导别人。 对于节点4，邻居节点分别为[3,4,5,6]，邻居节点的度数分别为[3,4,4,2]。现考虑第4行，邻居节点分到的权重分别为[121,16</p>
+<p>1]，可以看到，<strong>邻居节点度数越小，分配到的权重越大</strong>。因此，空间意义就是：<strong>每个节点通过边对外发送相同量的信息, 边越多的节点,每条边发送出去的信息量就越小</strong>。</p>
+<p>举个例子，要估计一个大佬的工资，那么他的朋友中除了同等高收入的朋友，也有一些低端交际花，如果按这些低端交际花的朋友数给他分配权重，那么就会拉低大佬的工资，因此，需要剔出这些低端交际花的影响。</p>
+<h3 id="Q3-GCN中参数矩阵W的维度如何确定？怎么理解GCN是transductive的？"><a href="#Q3-GCN中参数矩阵W的维度如何确定？怎么理解GCN是transductive的？" class="headerlink" title="Q3:GCN中参数矩阵W的维度如何确定？怎么理解GCN是transductive的？"></a>Q3:GCN中参数矩阵W的维度如何确定？怎么理解GCN是transductive的？</h3><p>由下列公式可知<br>$$<br>Z=\tilde{D}^{−1/2}\tilde{A}\tilde{D}^{−1/2}XW<br>$$<br>参数矩阵W的行数为输入节点特征的维度，不可调，而列数F为节点最后输出的特征维度，是可调参数。<br>虽然W的维度和邻接矩阵A无关，但是参数矩阵W的取值的更新和A相关，因此如果把训练集和测试集分开，分别形成自己的邻接矩阵。那么W的值的更新和训练集的邻接矩阵相关，如果直接用于计算测试集的embedding，效果应该会很差。这也是都说GCN是transductive的原因。</p>
+<h3 id="Q4：为什么GCN里使用NELL数据集相比于其他三个的分类准确率这么低？"><a href="#Q4：为什么GCN里使用NELL数据集相比于其他三个的分类准确率这么低？" class="headerlink" title="Q4：为什么GCN里使用NELL数据集相比于其他三个的分类准确率这么低？"></a>Q4：为什么GCN里使用NELL数据集相比于其他三个的分类准确率这么低？</h3><p><img src="img51.png" alt=""></p>
+<h3 id="Q5：目前GCN的分类准确率仅为80-左右，如何提高GCN在Citeseer、Cora、Pubmed、Nell上的分类准确率？"><a href="#Q5：目前GCN的分类准确率仅为80-左右，如何提高GCN在Citeseer、Cora、Pubmed、Nell上的分类准确率？" class="headerlink" title="Q5：目前GCN的分类准确率仅为80%左右，如何提高GCN在Citeseer、Cora、Pubmed、Nell上的分类准确率？"></a>Q5：目前GCN的分类准确率仅为80%左右，如何提高GCN在Citeseer、Cora、Pubmed、Nell上的分类准确率？</h3><h3 id="Q6：增加GCN层数，为何准确率还降低了？"><a href="#Q6：增加GCN层数，为何准确率还降低了？" class="headerlink" title="Q6：增加GCN层数，为何准确率还降低了？"></a>Q6：增加GCN层数，为何准确率还降低了？</h3><p>在  “<a href="https://blog.csdn.net/yyl424525/article/details/100057958" target="_blank" rel="noopener">A Comprehensive Survey on Graph Neural Networks</a>”和“<a href="https://blog.csdn.net/yyl424525/article/details/101024591" target="_blank" rel="noopener">Deeper Insights into Graph Convolutional Networks for Semi-Supervised Learning</a>”  中的解释是over smoothing，也就是层数多了，反而使远处的节点和近处的节点相似而更难以区分，当层数到达一定时，整个网络呈一个稳定的不动点，达到平衡。</p>
 
             </div>
             <hr/>
